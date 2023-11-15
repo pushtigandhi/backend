@@ -40,11 +40,16 @@ START Helper Functions
 */
 
 async function createTestItem(): Promise<HydratedDocument<IItem>> {
-
-  const item = new Item({
-    title: "Test Empty Item"
-  });
-
+  let item;
+  try {
+    item = new Item({
+      title: "Test Empty Item"
+    });
+  }catch (error) {
+    console.log("something went wrong....");
+    console.log(error);
+  }
+  
   console.log("saving item....");
   item.save()
     .then(() => {
@@ -79,23 +84,8 @@ describe('Create Test Data', function () {
 
     it('should return a default empty item', async function () {
       //const response = await request(app_.app)
-      console.log("create default");
-      try {
-        testItem = new Item({
-          title: "Test Empty Item"
-        });
-      }catch (error) {
-        console.log("something went wrong....");
-        console.log(error);
-      }
-      console.log("saving item....");
-      testItem.save()
-        .then(() => {
-            console.log('Generic Item saved successfully');
-        })
-        .catch((error) => {
-            console.error(error);
-        });
+
+      testItem = await createTestItem();
       
       console.log("new item title: ");
       console.log(testItem.title);
