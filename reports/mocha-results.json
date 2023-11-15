@@ -1,0 +1,40 @@
+{
+  "stats": {
+    "suites": 1,
+    "tests": 1,
+    "passes": 0,
+    "pending": 0,
+    "failures": 1,
+    "start": "2023-11-14T23:43:54.872Z",
+    "end": "2023-11-14T23:43:55.410Z",
+    "duration": 538
+  },
+  "tests": [
+    {
+      "title": "should return a default empty item",
+      "fullTitle": "Create Test Data should return a default empty item",
+      "file": "/mnt/c/Users/pusht/Desktop/NewVC/backend/src/test/test.ts",
+      "duration": 1,
+      "currentRetry": 1,
+      "err": {
+        "stack": "TypeError: Cannot read properties of undefined (reading 'save')\n    at Context.<anonymous> (src/test/test.ts:92:16)\n    at processImmediate (node:internal/timers:471:21)",
+        "message": "Cannot read properties of undefined (reading 'save')"
+      }
+    }
+  ],
+  "pending": [],
+  "failures": [
+    {
+      "title": "should return a default empty item",
+      "fullTitle": "Create Test Data should return a default empty item",
+      "file": "/mnt/c/Users/pusht/Desktop/NewVC/backend/src/test/test.ts",
+      "duration": 1,
+      "currentRetry": 1,
+      "err": {
+        "stack": "TypeError: Cannot read properties of undefined (reading 'save')\n    at Context.<anonymous> (src/test/test.ts:92:16)\n    at processImmediate (node:internal/timers:471:21)",
+        "message": "Cannot read properties of undefined (reading 'save')"
+      }
+    }
+  ],
+  "passes": []
+}
