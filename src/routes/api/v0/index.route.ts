@@ -5,6 +5,7 @@ import { Router } from "express";
 
 import itemsRoute from "./items.route";
 import tasksRoute from "./tasks.route";
+import eventsRoute from "./events.route";
 
 
 export default class v0Route {
@@ -17,7 +18,9 @@ export default class v0Route {
   private initializeRoutes() {
     const itemsRouter_ = new itemsRoute();
     const tasksRouter_ = new tasksRoute();
+    const eventsRouter_ = new eventsRoute();
     this.router.use("/items", itemsRouter_.router);
     this.router.use("/tasks", tasksRouter_.router);
+    this.router.use("/events", eventsRouter_.router);
   }
 }

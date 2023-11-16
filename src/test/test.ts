@@ -1,3 +1,5 @@
+//#region Imports
+
 import { expect } from "chai";
 import dotenv from "dotenv";
 import { resolve } from "path";
@@ -15,8 +17,11 @@ import mongoose, { HydratedDocument, Types } from "mongoose";
 
 import { before, after, describe, it } from 'mocha';
 
-import { Item, IItem, Task, ITask } from "../models/item.model";
+import { Item, IItem, Task, ITask, Event, IEvent } from "../models/item.model";
 
+//#endregion
+
+//#region Setup
 
 let mongod: MongoMemoryServer;
 
@@ -29,7 +34,8 @@ before(async function () {
 async function beforeEachSuite() {
   //console.log("clearing existing data....");
   await Item.deleteMany({});
-  //await Task.deleteMany({});
+  await Task.deleteMany({});
+  await Event.deleteMany({});
 }
 
 after(async function () {
@@ -37,6 +43,8 @@ after(async function () {
   await disconnectDatabase();
   await mongod.stop(); // stop the in-memory database
 });
+
+//#endregion
 
 //#region Helper Functions
 
@@ -58,20 +66,32 @@ async function createTaskItem(): Promise<HydratedDocument<ITask>> {
   return task;
 }
 
+async function createEventItem(): Promise<HydratedDocument<IEvent>> {
+  let event;
+  event = new Event({
+     title: "Test Empty Event"
+  });
+  event.save();
+  return event;
+}
+
 //#endregion
 
 //#region Inialization
 
-describe('Create Test Data', function () {
+describe('get default items', function () {
   this.timeout(2000);
   let app_: App;
   let testItem: mongoose.HydratedDocument<IItem>;
   let testTask: mongoose.HydratedDocument<ITask>;
+  let testEvent: mongoose.HydratedDocument<IEvent>;
 
   before(async function () {
     await beforeEachSuite();
     app_ = new App();
   })
+
+  //items
 
   it("should return 201 if no existing items", async function () {
     const response = await request(app_.app)
@@ -80,15 +100,6 @@ describe('Create Test Data', function () {
     expect(response.status).to.equal(201);
     expect(response.type).to.equal("application/json");
     expect(response.body.items).to.be.empty;
-  });
-
-  it("should return 201 if no existing tasks", async function () {
-    const response = await request(app_.app)
-      .get("/api/v0/tasks/");
-
-    expect(response.status).to.equal(201);
-    expect(response.type).to.equal("application/json");
-    expect(response.body.tasks).to.be.empty;
   });
 
   it('should return a default empty item', async function () {
@@ -106,6 +117,17 @@ describe('Create Test Data', function () {
     expect(response.body.items).to.be.an("array"); 
     expect(response.body.items[0]).to.be.an("object");
   });
+
+  //tasks
+
+  it("should return 201 if no existing tasks", async function () {
+    const response = await request(app_.app)
+      .get("/api/v0/tasks/");
+
+    expect(response.status).to.equal(201);
+    expect(response.type).to.equal("application/json");
+    expect(response.body.tasks).to.be.empty;
+  });
   
   it('should return an empty task', async function () {
     testTask = await createTaskItem();
@@ -121,6 +143,33 @@ describe('Create Test Data', function () {
     expect(response.type).to.equal("application/json");
     expect(response.body.tasks).to.be.an("array"); 
     expect(response.body.tasks[0]).to.be.an("object");
+  });
+
+  //events 
+
+  it("should return 201 if no existing events", async function () {
+    const response = await request(app_.app)
+      .get("/api/v0/events/");
+
+    expect(response.status).to.equal(201);
+    expect(response.type).to.equal("application/json");
+    expect(response.body.events).to.be.empty;
+  });
+
+  it('should return an empty event', async function () {
+    testEvent = await createEventItem();
+
+    expect(testEvent).to.have.property("title", "Test Empty Event");
+  })
+
+  it("should return a 201 and list of existing events", async function () {
+    const response = await request(app_.app)
+      .get("/api/v0/events/");
+    
+    expect(response.status).to.equal(201);
+    expect(response.type).to.equal("application/json");
+    expect(response.body.events).to.be.an("array"); 
+    expect(response.body.events[0]).to.be.an("object");
   });
 
 });

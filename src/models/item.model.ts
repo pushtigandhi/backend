@@ -118,13 +118,11 @@ const itemSchema = new mongoose.Schema(
     }
 );
 
-
 export interface ITask extends IItem {
     subtasks: [String],
 }
 
 const taskSchema = new Schema({
-
     // Include properties from the base IITem
     ...itemSchema.obj,
 
@@ -134,22 +132,31 @@ const taskSchema = new Schema({
     }
 });
 
+export interface IEvent extends IItem {
+    contacts: [Schema.Types.ObjectId],
+    location: string,
+    address: Schema.Types.ObjectId,
+    checklist: [string],
+}
 
-// const eventSchema = new Schema({
-//     contacts: {
-//         type: [Schema.Types.ObjectId],
-//     },
-//     location: {
-//         type: String,
-//     },
-//     address: {
-//         type: Schema.Types.ObjectId,
-//         ref: "Address",
-//     },
-//     checklist: {
-//         type: [String],
-//     }
-// });
+const eventSchema = new Schema({
+    // Include properties from the base IITem
+    ...itemSchema.obj,
+    
+    contacts: {
+        type: [Schema.Types.ObjectId],
+    },
+    location: {
+        type: String,
+    },
+    address: {
+        type: Schema.Types.ObjectId,
+        ref: "Address",
+    },
+    checklist: {
+        type: [String],
+    }
+});
 
 // const Event = Item.discriminator('Event', eventSchema);
 
@@ -181,5 +188,6 @@ const taskSchema = new Schema({
 // };
 export const Item = model<IItem>('Item', itemSchema);
 export const Task = model<ITask>('Task', taskSchema);
+export const Event = model<IEvent>('Event', eventSchema);
 
 //export default Item;
