@@ -4,6 +4,7 @@
 import { Router } from "express";
 
 import itemsRoute from "./items.route";
+import tasksRoute from "./tasks.route";
 
 
 export default class v0Route {
@@ -14,9 +15,9 @@ export default class v0Route {
   }
 
   private initializeRoutes() {
-    console.log("mounting items...!");
-
     const itemsRouter_ = new itemsRoute();
+    const tasksRouter_ = new tasksRoute();
     this.router.use("/items", itemsRouter_.router);
+    this.router.use("/tasks", tasksRouter_.router);
   }
 }

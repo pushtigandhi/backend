@@ -15,8 +15,7 @@ import mongoose, { HydratedDocument, Types } from "mongoose";
 
 import { before, after, describe, it } from 'mocha';
 
-import Item, { IItem } from "../models/item.model";
-
+import { Item, IItem, Task, ITask } from "../models/item.model";
 
 
 let mongod: MongoMemoryServer;
@@ -28,114 +27,188 @@ before(async function () {
 });
 
 async function beforeEachSuite() {
-  console.log("clearing existing data....");
+  //console.log("clearing existing data....");
   await Item.deleteMany({});
+  //await Task.deleteMany({});
 }
 
+after(async function () {
+  //console.log("request disconnect");
+  await disconnectDatabase();
+  await mongod.stop(); // stop the in-memory database
+});
 
-/*
+//#region Helper Functions
 
-START Helper Functions
-
-*/
-
-async function createTestItem(): Promise<HydratedDocument<IItem>> {
+async function createDefaultItem(): Promise<HydratedDocument<IItem>> {
   let item;
-  try {
-    item = new Item({
-      title: "Test Empty Item"
-    });
-  }catch (error) {
-    console.log("something went wrong....");
-    console.log(error);
-  }
-  
-  console.log("saving item....");
-  item.save()
-    .then(() => {
-        console.log('Generic Item saved successfully');
-    })
-    .catch((error) => {
-        console.error(error);
-    });
-  
-  console.log("new item title: ");
-  console.log(item.title);
+  item = new Item({
+     title: "Test Empty Item"
+  });
+  item.save();
   return item;
 }
 
+async function createTaskItem(): Promise<HydratedDocument<ITask>> {
+  let task;
+  task = new Task({
+     title: "Test Empty Task"
+  });
+  task.save();
+  return task;
+}
 
-/*
+//#endregion
 
-  END Helper Functions
- 
-*/
-
-/*
-  
-  START Test Cases
-
-*/
+//#region Inialization
 
 describe('Create Test Data', function () {
   this.timeout(2000);
   let app_: App;
   let testItem: mongoose.HydratedDocument<IItem>;
+  let testTask: mongoose.HydratedDocument<ITask>;
 
-    it('should return a default empty item', async function () {
-      //const response = await request(app_.app)
+  before(async function () {
+    await beforeEachSuite();
+    app_ = new App();
+  })
 
-      testItem = await createTestItem();
-      
-      console.log("new item title: ");
-      console.log(testItem.title);
+  it("should return 201 if no existing items", async function () {
+    const response = await request(app_.app)
+      .get("/api/v0/items/");
 
-      // console.log("Item title: ");
-      // console.log(testItem.title);
-      expect(testItem).to.have.property("title", "Test Empty Item");
+    expect(response.status).to.equal(201);
+    expect(response.type).to.equal("application/json");
+    expect(response.body.items).to.be.empty;
+  });
 
-      // expect(testItem).to.have.property("title", "createdAt");
-      // expect(testItem.title).to.equal("Test Empty Item");
-    })
+  it("should return 201 if no existing tasks", async function () {
+    const response = await request(app_.app)
+      .get("/api/v0/tasks/");
 
-});
+    expect(response.status).to.equal(201);
+    expect(response.type).to.equal("application/json");
+    expect(response.body.tasks).to.be.empty;
+  });
 
-// describe('add new item', async function () {
-//   this.timeout(5000);
-//   let app_: App;
-//   let testItem: mongoose.HydratedDocument<IItem>;
+  it('should return a default empty item', async function () {
+    testItem = await createDefaultItem();
 
-//   before(async function () {
-//     //await beforeEachSuite();
-//     app_ = new App();
-//   })
+    expect(testItem).to.have.property("title", "Test Empty Item");
+  })
 
-//   it("should return a 201 and the new item object", async function () {
-//     console.log("creating new!");
-//     const response = await request(app_.app)
-//       .post("/api/v0/items/")
-//       .send({
-//         title: "test empty",
+  it("should return a 201 and list of existing items", async function () {
+    const response = await request(app_.app)
+      .get("/api/v0/items/");
 
-//       });
+    expect(response.status).to.equal(201);
+    expect(response.type).to.equal("application/json");
+    expect(response.body.items).to.be.an("array"); 
+    expect(response.body.items[0]).to.be.an("object");
+  });
+  
+  it('should return an empty task', async function () {
+    testTask = await createTaskItem();
+
+    expect(testTask).to.have.property("title", "Test Empty Task");
+  })
+
+  it("should return a 201 and list of existing tasks", async function () {
+    const response = await request(app_.app)
+      .get("/api/v0/tasks/");
     
-//       expect(response.status).to.equal(201);
-//       expect(response.type).to.equal("application/json");
-//       expect(response.body).to.have.property("item");
-//       expect(response.body.item).to.have.property("title", "test empty");
-//   });
-  
-// });
+    expect(response.status).to.equal(201);
+    expect(response.type).to.equal("application/json");
+    expect(response.body.tasks).to.be.an("array"); 
+    expect(response.body.tasks[0]).to.be.an("object");
+  });
 
-/*
-  
-  END Test Cases
-
-*/
-
-
-after(async function () {
-  console.log("request disconnect");
-  await disconnectDatabase();
-  await mongod.stop(); // stop the in-memory database
 });
+
+//#endregion
+
+//#region Test Cases
+
+describe('add new default item', async function () {
+  this.timeout(2000);
+  let app_: App;
+  let testItem: mongoose.HydratedDocument<IItem>;
+
+  before(async function () {
+    await beforeEachSuite();
+    app_ = new App();
+  })
+
+  //POSITIVE cases
+
+  it("should return a 201 and the new item object", async function () {
+    //console.log("creating new!");
+    const response = await request(app_.app)
+      .post("/api/v0/items/")
+      .send({
+        title: "test empty",
+
+      });
+    
+      expect(response.status).to.equal(201);
+      expect(response.type).to.equal("application/json");
+      expect(response.body).to.have.property("item");
+      expect(response.body.item).to.have.property("title", "test empty");
+  });
+
+  // NEGATIVE cases 
+
+  it("should return a 400 if title is missing", async function () {
+    //console.log("creating new!");
+    const response = await request(app_.app)
+      .post("/api/v0/items/")
+      .send({});
+    
+      expect(response.status).to.equal(400);
+      expect(response.type).to.equal("application/json");
+  });
+  
+});
+
+describe('add new task item', async function () {
+  this.timeout(2000);
+  let app_: App;
+  let testItem: mongoose.HydratedDocument<ITask>;
+
+  before(async function () {
+    await beforeEachSuite();
+    app_ = new App();
+  })
+
+  //POSITIVE cases
+
+  it("should return a 201 and the new task object", async function () {
+    const response = await request(app_.app)
+      .post("/api/v0/tasks/")
+      .send({
+        title: "test empty task",
+
+      });
+
+    expect(response.status).to.equal(201);
+    expect(response.type).to.equal("application/json");
+    expect(response.body).to.have.property("task");
+    expect(response.body.task).to.have.property("title", "test empty task");
+  });
+
+  // NEGATIVE cases 
+  
+  it("should return a 400 if title is missing", async function () {
+    const response = await request(app_.app)
+      .post("/api/v0/tasks/")
+      .send({});
+  
+    expect(response.status).to.equal(400);
+    expect(response.type).to.equal("application/json");
+  });
+  
+});
+
+//#endregion
+
+

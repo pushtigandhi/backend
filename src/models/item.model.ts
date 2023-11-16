@@ -1,31 +1,31 @@
 import mongoose, { Schema, model } from "mongoose";
 import ContactCard,{IContactCard} from "./contactcard.model";
 
-interface IAddress {
-    street: string,
-    city: string,
-    state: string,
-    postalCode: string,
-}
+// interface IAddress {
+//     street: string,
+//     city: string,
+//     state: string,
+//     postalCode: string,
+// }
 
-const addressSchema = new mongoose.Schema({
-  street: {
-      type: String,
-      required: true,
-    },
-  city: {
-      type: String,
-      required: true,
-    },
-  state: {
-      type: String,
-      required: true,
-    },
-  postalCode: {
-      type: String,
-      required: true,
-    }
-});
+// const addressSchema = new mongoose.Schema({
+//   street: {
+//       type: String,
+//       required: true,
+//     },
+//   city: {
+//       type: String,
+//       required: true,
+//     },
+//   state: {
+//       type: String,
+//       required: true,
+//     },
+//   postalCode: {
+//       type: String,
+//       required: true,
+//     }
+// });
 
 interface ITag {
     name: string;
@@ -45,23 +45,23 @@ const tagSchema = new Schema<ITag>({
 
 export interface IItem {
     title: string;
-    // category: string;
-    // section?: string;
-    // icon: string;
-    // favicon?: {
-    //     data: Buffer;
-    //     contentType: string;
-    // };
-    // tags?: [ITag];
-    // description?: string;
-    // startDate?: Date;
-    // endDate?: Date;
-    // duration?: Number;
-    // repeat?: [string];
-    // priority?: string;
-    // notes?: [string];
-    // createdAt: Date;
-    // updatedAt?: Date;
+    category: string;
+    section?: string;
+    icon: string;
+    favicon?: {
+        data: Buffer;
+        contentType: string;
+    };
+    tags?: [ITag];
+    description?: string;
+    startDate?: Date;
+    endDate?: Date;
+    duration?: Number;
+    repeat?: [string];
+    priority?: string;
+    notes?: [string];
+    createdAt: Date;
+    updatedAt?: Date;
 }
 
 const itemSchema = new mongoose.Schema(
@@ -71,62 +71,69 @@ const itemSchema = new mongoose.Schema(
             required: true,
             //: "text",
         },
-        // category: {
-        //     type: String,
-        //     default: "Backlog",
-        // },
-        // section: {
-        //     type: String,
-        // },
-        // icon: {
-        //     type: String,
-        //     default: "\u{1F4CD}"
-        // },
-        // favicon: {
-        //     data: Buffer,
-        //     contentType: String,
-        // },
-        // tags: {
-        //     type: [Schema.Types.ObjectId],
-        // },
-        // description: {
-        //     type: String,
-        // },
-        // startDate: {
-        //     type: Date,
-        // },
-        // endDate: {
-        //     type: Date,
-        // },
-        // duration: {
-        //     type: Number,
-        // },
-        // repeat: {
-        //     type: [String],
-        // },
-        // priority: {
-        //     type: String,
-        //     enum: ["LOW", "MEDIUM", "HIGH"],
-        // },
-        // notes: {
-        //     type: [String],
-        // }
+        category: {
+            type: String,
+            default: "Backlog",
+        },
+        section: {
+            type: String,
+        },
+        icon: {
+            type: String,
+            default: "\u{1F4CD}"
+        },
+        favicon: {
+            data: Buffer,
+            contentType: String,
+        },
+        tags: {
+            type: [Schema.Types.ObjectId],
+        },
+        description: {
+            type: String,
+        },
+        startDate: {
+            type: Date,
+        },
+        endDate: {
+            type: Date,
+        },
+        duration: {
+            type: Number,
+        },
+        repeat: {
+            type: [String],
+        },
+        priority: {
+            type: String,
+            enum: ["LOW", "MEDIUM", "HIGH"],
+        },
+        notes: {
+            type: [String],
+        }
     },
-    // {
-    //     timestamps: true,
-    //     discriminatorKey: 'itemType',
-    // }
+    {
+        timestamps: true,
+        discriminatorKey: 'itemType',
+    }
 );
 
-const Item = model<IItem>('Item', itemSchema);
 
-// const taskSchema = new Schema({
-//     subtasks: {
-//         type: [String],
-//     }
-// });
+export interface ITask extends IItem {
+    subtasks: [String],
+}
 
-// const Task = Item.discriminator('Task', taskSchema);
+const taskSchema = new Schema({
+
+    // Include properties from the base IITem
+    ...itemSchema.obj,
+
+    subtasks: {
+        type: [String],
+        default: [],
+    }
+});
+
 
 // const eventSchema = new Schema({
 //     contacts: {
@@ -165,11 +172,14 @@ const Item = model<IItem>('Item', itemSchema);
 
 // const Recipe = Item.discriminator('Recipe', recipeSchema);
 
-exports = {
-    Item,
-    // Task,
-    // Event,
-    // JournalEntry,
-    // Recipe,
-};
-export default Item;
+// exports = {
+//     Item,
+//     // Task,
+//     // Event,
+//     // JournalEntry,
+//     // Recipe,
+// };
+export const Item = model<IItem>('Item', itemSchema);
+export const Task = model<ITask>('Task', taskSchema);
+
+//export default Item;

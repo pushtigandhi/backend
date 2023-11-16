@@ -11,8 +11,6 @@ export default class ItemsRoute implements Route {
     }
 
     private initializeRoutes() {
-    console.log("getting path...!");
-
         this.router.get('/', this.itemController.getItems);
         this.router.post('/', this.itemController.addItem);
     }

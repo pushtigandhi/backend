@@ -11,15 +11,14 @@ export default class App {
             this.mountRoutes();
         });
 
-        console.log(
-            "constructing app"
-        );
+        // console.log(
+        //     "constructing app"
+        // );
     }
 
     private mountRoutes(): void {
         const indexRoute_ = new indexRoute();
         this.app.use('/', indexRoute_.router); 
-        console.log("mounting oringal router");
     }
 
     private async useMiddleware(): Promise<void> {

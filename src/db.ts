@@ -5,9 +5,7 @@ export async function connectDatabase(mongo_uri: string, db_name: string): Promi
         await mongoose.connect(mongo_uri, {
             dbName: db_name,
         });
-        console.log('Connected to database');
     } catch (err) {
-        console.log('Connection error');
         console.log(err);
         process.exit(1);
     }
