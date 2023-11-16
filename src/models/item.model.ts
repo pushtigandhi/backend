@@ -140,7 +140,7 @@ export interface IEvent extends IItem {
 }
 
 const eventSchema = new Schema({
-    // Include properties from the base IITem
+
     ...itemSchema.obj,
     
     contacts: {
@@ -158,15 +158,18 @@ const eventSchema = new Schema({
     }
 });
 
-// const Event = Item.discriminator('Event', eventSchema);
+export interface IPage extends IItem {
+    text: string,
+}
 
-// const journalEntrySchema = new Schema({
-//     text: {
-//         type: String,
-//     }
-// });
+const pageSchema = new Schema({
 
-// const JournalEntry = Item.discriminator('JournalEntry', journalEntrySchema);
+    ...itemSchema.obj,
+    
+    text: {
+        type: String,
+    }
+});
 
 // const recipeSchema = new Schema({
 //     ingredients: {
@@ -189,5 +192,6 @@ const eventSchema = new Schema({
 export const Item = model<IItem>('Item', itemSchema);
 export const Task = model<ITask>('Task', taskSchema);
 export const Event = model<IEvent>('Event', eventSchema);
+export const Page = model<IPage>('Page', pageSchema);
 
 //export default Item;

@@ -2,15 +2,15 @@ import { Request, Response } from "express";
 import { isValidObjectId } from "mongoose";
 import _ from 'lodash';
 
-import TaskService from "../services/tasks.service";
+import PageService from "../services/pages.service";
 
-export default class TaskController {
-    public taskService = new TaskService();
+export default class PageController {
+    public pageService = new PageService();
 
-    public getTasks = async (req: Request, res: Response) => {
+    public getPages = async (req: Request, res: Response) => {
         try {
-            const tasks = await this.taskService.getTasks();
-            res.status(201).json({ tasks });
+            const pages = await this.pageService.getPages();
+            res.status(201).json({ pages });
         } catch (error) {
             console.log(error);
             res.status(500).json({
@@ -19,19 +19,19 @@ export default class TaskController {
         }
     }
 
-    public addTask = async (req: Request, res: Response) => {
-        let newTask = req.body;
+    public addPage = async (req: Request, res: Response) => {
+        let newPage = req.body;
         
         try {
-            newTask = _.pick(newTask, ["title"]);
+            newPage = _.pick(newPage, ["title"]);
 
-            const missingFields = _.difference(["title"], Object.keys(newTask));
+            const missingFields = _.difference(["title"], Object.keys(newPage));
             if (missingFields.length > 0) {
                 return res.status(400).json({ error: 'Missing required fields', missingFields});
             } 
 
-            const task = await this.taskService.addTask(newTask);
-            res.status(201).json({ task });
+            const page = await this.pageService.addPage(newPage);
+            res.status(201).json({ page });
         } catch (error) {
             console.log(error);
             res.status(500).json({

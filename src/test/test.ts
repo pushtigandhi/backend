@@ -17,7 +17,8 @@ import mongoose, { HydratedDocument, Types } from "mongoose";
 
 import { before, after, describe, it } from 'mocha';
 
-import { Item, IItem, Task, ITask, Event, IEvent } from "../models/item.model";
+import { Item, IItem, Task, ITask, Event, IEvent,
+  Page, IPage } from "../models/item.model";
 
 //#endregion
 
@@ -36,6 +37,7 @@ async function beforeEachSuite() {
   await Item.deleteMany({});
   await Task.deleteMany({});
   await Event.deleteMany({});
+  await Page.deleteMany({});
 }
 
 after(async function () {
@@ -49,8 +51,7 @@ after(async function () {
 //#region Helper Functions
 
 async function createDefaultItem(): Promise<HydratedDocument<IItem>> {
-  let item;
-  item = new Item({
+  const item = new Item({
      title: "Test Empty Item"
   });
   item.save();
@@ -58,8 +59,7 @@ async function createDefaultItem(): Promise<HydratedDocument<IItem>> {
 }
 
 async function createTaskItem(): Promise<HydratedDocument<ITask>> {
-  let task;
-  task = new Task({
+  const task = new Task({
      title: "Test Empty Task"
   });
   task.save();
@@ -67,12 +67,19 @@ async function createTaskItem(): Promise<HydratedDocument<ITask>> {
 }
 
 async function createEventItem(): Promise<HydratedDocument<IEvent>> {
-  let event;
-  event = new Event({
+  const event = new Event({
      title: "Test Empty Event"
   });
   event.save();
   return event;
+}
+
+async function createPageItem(): Promise<HydratedDocument<IPage>> {
+  const page = new Page({
+     title: "Test Empty Page"
+  });
+  page.save();
+  return page;
 }
 
 //#endregion
@@ -85,6 +92,7 @@ describe('get default items', function () {
   let testItem: mongoose.HydratedDocument<IItem>;
   let testTask: mongoose.HydratedDocument<ITask>;
   let testEvent: mongoose.HydratedDocument<IEvent>;
+  let testPage: mongoose.HydratedDocument<IPage>;
 
   before(async function () {
     await beforeEachSuite();
@@ -172,6 +180,33 @@ describe('get default items', function () {
     expect(response.body.events[0]).to.be.an("object");
   });
 
+  //pages
+
+  it("should return 201 if no existing events", async function () {
+    const response = await request(app_.app)
+      .get("/api/v0/pages/");
+
+    expect(response.status).to.equal(201);
+    expect(response.type).to.equal("application/json");
+    expect(response.body.pages).to.be.empty;
+  });
+
+  it('should return an empty page', async function () {
+    testPage = await createPageItem();
+
+    expect(testPage).to.have.property("title", "Test Empty Page");
+  })
+
+  it("should return a 201 and list of existing pages", async function () {
+    const response = await request(app_.app)
+      .get("/api/v0/pages/");
+    
+    expect(response.status).to.equal(201);
+    expect(response.type).to.equal("application/json");
+    expect(response.body.pages).to.be.an("array"); 
+    expect(response.body.pages[0]).to.be.an("object");
+  });
+
 });
 
 //#endregion
@@ -250,6 +285,84 @@ describe('add new task item', async function () {
   it("should return a 400 if title is missing", async function () {
     const response = await request(app_.app)
       .post("/api/v0/tasks/")
+      .send({});
+  
+    expect(response.status).to.equal(400);
+    expect(response.type).to.equal("application/json");
+  });
+  
+});
+
+describe('add new event item', async function () {
+  this.timeout(2000);
+  let app_: App;
+  let testEvent: mongoose.HydratedDocument<IEvent>;
+
+  before(async function () {
+    await beforeEachSuite();
+    app_ = new App();
+  })
+
+  //POSITIVE cases
+
+  it("should return a 201 and the new event object", async function () {
+    const response = await request(app_.app)
+      .post("/api/v0/events/")
+      .send({
+        title: "test empty event",
+
+      });
+
+    expect(response.status).to.equal(201);
+    expect(response.type).to.equal("application/json");
+    expect(response.body).to.have.property("event");
+    expect(response.body.event).to.have.property("title", "test empty event");
+  });
+
+  // NEGATIVE cases 
+  
+  it("should return a 400 if title is missing", async function () {
+    const response = await request(app_.app)
+      .post("/api/v0/events/")
+      .send({});
+  
+    expect(response.status).to.equal(400);
+    expect(response.type).to.equal("application/json");
+  });
+  
+});
+
+describe('add new page item', async function () {
+  this.timeout(2000);
+  let app_: App;
+  let testPage: mongoose.HydratedDocument<IPage>;
+
+  before(async function () {
+    await beforeEachSuite();
+    app_ = new App();
+  })
+
+  //POSITIVE cases
+
+  it("should return a 201 and the new page object", async function () {
+    const response = await request(app_.app)
+      .post("/api/v0/pages/")
+      .send({
+        title: "test empty page",
+
+      });
+
+    expect(response.status).to.equal(201);
+    expect(response.type).to.equal("application/json");
+    expect(response.body).to.have.property("page");
+    expect(response.body.page).to.have.property("title", "test empty page");
+  });
+
+  // NEGATIVE cases 
+  
+  it("should return a 400 if title is missing", async function () {
+    const response = await request(app_.app)
+      .post("/api/v0/pages/")
       .send({});
   
     expect(response.status).to.equal(400);

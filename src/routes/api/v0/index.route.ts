@@ -6,6 +6,7 @@ import { Router } from "express";
 import itemsRoute from "./items.route";
 import tasksRoute from "./tasks.route";
 import eventsRoute from "./events.route";
+import pagesRoute from "./pages.route";
 
 
 export default class v0Route {
@@ -19,8 +20,10 @@ export default class v0Route {
     const itemsRouter_ = new itemsRoute();
     const tasksRouter_ = new tasksRoute();
     const eventsRouter_ = new eventsRoute();
+    const pagesRouter_ = new pagesRoute();
     this.router.use("/items", itemsRouter_.router);
     this.router.use("/tasks", tasksRouter_.router);
     this.router.use("/events", eventsRouter_.router);
+    this.router.use("/pages", pagesRouter_.router);
   }
 }

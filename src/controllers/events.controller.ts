@@ -4,7 +4,7 @@ import _ from 'lodash';
 
 import EventService from "../services/events.service";
 
-export default class ItemsController {
+export default class EventsController {
     public eventService = new EventService();
 
     public getEvents = async (req: Request, res: Response) => {
