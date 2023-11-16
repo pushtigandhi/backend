@@ -10,8 +10,6 @@ export default class IndexRoute implements Route {
   }
 
   private initializeRoutes() {
-
-    console.log("mounting api...!");
     const apiRoute_ = new apiRoute();
     this.router.use("/api", apiRoute_.router); // mount the api router to /api
     this.router.all("*", (req, res) => {

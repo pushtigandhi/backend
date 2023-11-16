@@ -13,8 +13,6 @@ export default class APIRoute implements Route {
     }
 
     private initializeRoutes() {  
-        console.log("mounting V0...!");
-
         const v0Route_ = new v0Route();  
         this.router.use('/v0', v0Route_.router); // mount the v0 router to /api/v0
     }
