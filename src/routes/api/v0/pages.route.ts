@@ -2,7 +2,7 @@ import { Router } from 'express';
 import Route from '@interfaces/route.interface';
 import PageController from '../../../controllers/pages.controller';
 
-export default class TasksRoute implements Route {
+export default class PageRoute implements Route {
     public router: Router = Router();
     private pageController = new PageController();
 

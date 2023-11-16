@@ -18,7 +18,7 @@ import mongoose, { HydratedDocument, Types } from "mongoose";
 import { before, after, describe, it } from 'mocha';
 
 import { Item, IItem, Task, ITask, Event, IEvent,
-  Page, IPage } from "../models/item.model";
+  Page, IPage, Recipe, IRecipe } from "../models/item.model";
 
 //#endregion
 
@@ -82,6 +82,13 @@ async function createPageItem(): Promise<HydratedDocument<IPage>> {
   return page;
 }
 
+async function createRecipeItem(): Promise<HydratedDocument<IRecipe>> {
+  const recipe = new Recipe({
+     title: "Test Empty Recipe"
+  });
+  recipe.save();
+  return recipe;
+}
 //#endregion
 
 //#region Inialization
@@ -93,6 +100,7 @@ describe('get default items', function () {
   let testTask: mongoose.HydratedDocument<ITask>;
   let testEvent: mongoose.HydratedDocument<IEvent>;
   let testPage: mongoose.HydratedDocument<IPage>;
+  let testRecipe: mongoose.HydratedDocument<IRecipe>;
 
   before(async function () {
     await beforeEachSuite();
@@ -205,6 +213,33 @@ describe('get default items', function () {
     expect(response.type).to.equal("application/json");
     expect(response.body.pages).to.be.an("array"); 
     expect(response.body.pages[0]).to.be.an("object");
+  });
+
+  //recipes
+
+  it("should return 201 if no existing recipes", async function () {
+    const response = await request(app_.app)
+      .get("/api/v0/recipes/");
+
+    expect(response.status).to.equal(201);
+    expect(response.type).to.equal("application/json");
+    expect(response.body.recipes).to.be.empty;
+  });
+
+  it('should return an empty page', async function () {
+    testRecipe = await createRecipeItem();
+
+    expect(testRecipe).to.have.property("title", "Test Empty Recipe");
+  })
+
+  it("should return a 201 and list of existing recipes", async function () {
+    const response = await request(app_.app)
+      .get("/api/v0/recipes/");
+    
+    expect(response.status).to.equal(201);
+    expect(response.type).to.equal("application/json");
+    expect(response.body.recipes).to.be.an("array"); 
+    expect(response.body.recipes[0]).to.be.an("object");
   });
 
 });
@@ -371,6 +406,44 @@ describe('add new page item', async function () {
   
 });
 
+describe('add new recipe item', async function () {
+  this.timeout(2000);
+  let app_: App;
+  let testRecipe: mongoose.HydratedDocument<IPage>;
+
+  before(async function () {
+    await beforeEachSuite();
+    app_ = new App();
+  })
+
+  //POSITIVE cases
+
+  it("should return a 201 and the new recipe object", async function () {
+    const response = await request(app_.app)
+      .post("/api/v0/recipes/")
+      .send({
+        title: "test empty recipe",
+
+      });
+
+    expect(response.status).to.equal(201);
+    expect(response.type).to.equal("application/json");
+    expect(response.body).to.have.property("recipe");
+    expect(response.body.recipe).to.have.property("title", "test empty recipe");
+  });
+
+  // NEGATIVE cases 
+  
+  it("should return a 400 if title is missing", async function () {
+    const response = await request(app_.app)
+      .post("/api/v0/recipes/")
+      .send({});
+  
+    expect(response.status).to.equal(400);
+    expect(response.type).to.equal("application/json");
+  });
+  
+});
 //#endregion
 
 

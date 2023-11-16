@@ -171,27 +171,29 @@ const pageSchema = new Schema({
     }
 });
 
-// const recipeSchema = new Schema({
-//     ingredients: {
-//         type: [String],
-//     },
-//     directions: {
-//         type: [String],
-//     }
-// });
+export interface IRecipe extends IItem {
+    ingredients: [string],
+    directions: [string],
+}
+
+const recipeSchema = new Schema({
+    
+    ...itemSchema.obj,
+
+    ingredients: {
+        type: [String],
+    },
+    directions: {
+        type: [String],
+    }
+});
 
 // const Recipe = Item.discriminator('Recipe', recipeSchema);
 
-// exports = {
-//     Item,
-//     // Task,
-//     // Event,
-//     // JournalEntry,
-//     // Recipe,
-// };
 export const Item = model<IItem>('Item', itemSchema);
 export const Task = model<ITask>('Task', taskSchema);
 export const Event = model<IEvent>('Event', eventSchema);
 export const Page = model<IPage>('Page', pageSchema);
+export const Recipe = model<IRecipe>('Recipe', recipeSchema);
 
 //export default Item;
