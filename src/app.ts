@@ -5,7 +5,9 @@ export default class App {
     public app: express.Application;
     
     constructor() {
+        const cors = require('cors');
         this.app = express();
+        this.app.use(cors());
         
         this.useMiddleware().then(() => {
             this.mountRoutes();
