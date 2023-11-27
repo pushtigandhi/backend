@@ -12,6 +12,9 @@ export default class ItemsRoute implements Route {
 
     private initializeRoutes() {
         this.router.get('/', this.itemController.getItems);
+        this.router.get('/:id', this.itemController.getItemById);
         this.router.post('/', this.itemController.addItem);
+        this.router.delete('/:id', this.itemController.deleteItem);
+        this.router.patch('/:id', this.itemController.editItem);
     }
 }

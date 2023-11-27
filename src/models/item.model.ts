@@ -27,7 +27,7 @@ import ContactCard,{IContactCard} from "./contactcard.model";
 //     }
 // });
 
-interface ITag {
+export interface ITag {
     name: string;
     color: string;
 }
@@ -195,5 +195,6 @@ export const Task = model<ITask>('Task', taskSchema);
 export const Event = model<IEvent>('Event', eventSchema);
 export const Page = model<IPage>('Page', pageSchema);
 export const Recipe = model<IRecipe>('Recipe', recipeSchema);
+export const Tag = model<ITag>('Tag', tagSchema);
 
 //export default Item;
