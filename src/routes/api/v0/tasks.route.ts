@@ -12,6 +12,10 @@ export default class TasksRoute implements Route {
 
     private initializeRoutes() {
         this.router.get('/', this.taskController.getTasks);
+        this.router.get('/:id', this.taskController.getTaskById);
         this.router.post('/', this.taskController.addTask);
+        this.router.delete('/:id', this.taskController.deleteTask);
+        this.router.patch('/:id', this.taskController.editTask);
+
     }
 }

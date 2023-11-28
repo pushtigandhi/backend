@@ -91,160 +91,160 @@ async function createRecipeItem(): Promise<HydratedDocument<IRecipe>> {
 }
 //#endregion
 
-// //#region Inialization
+//#region Inialization
 
-// describe('get default items', function () {
-//   this.timeout(2000);
-//   let app_: App;
-//   let testItem: mongoose.HydratedDocument<IItem>;
-//   let testTask: mongoose.HydratedDocument<ITask>;
-//   let testEvent: mongoose.HydratedDocument<IEvent>;
-//   let testPage: mongoose.HydratedDocument<IPage>;
-//   let testRecipe: mongoose.HydratedDocument<IRecipe>;
+describe('get default items', function () {
+  this.timeout(2000);
+  let app_: App;
+  let testItem: mongoose.HydratedDocument<IItem>;
+  let testTask: mongoose.HydratedDocument<ITask>;
+  let testEvent: mongoose.HydratedDocument<IEvent>;
+  let testPage: mongoose.HydratedDocument<IPage>;
+  let testRecipe: mongoose.HydratedDocument<IRecipe>;
 
-//   before(async function () {
-//     await beforeEachSuite();
-//     app_ = new App();
-//   })
+  before(async function () {
+    await beforeEachSuite();
+    app_ = new App();
+  })
 
-//   //items
+  //items
 
-//   it("should return 201 if no existing items", async function () {
-//     const response = await request(app_.app)
-//       .get("/api/v0/items/");
+  it("should return 201 if no existing items", async function () {
+    const response = await request(app_.app)
+      .get("/api/v0/items/");
 
-//     expect(response.status).to.equal(201);
-//     expect(response.type).to.equal("application/json");
-//     expect(response.body.items).to.be.empty;
-//   });
+    expect(response.status).to.equal(201);
+    expect(response.type).to.equal("application/json");
+    expect(response.body.items).to.be.empty;
+  });
 
-//   it('should return a default empty item', async function () {
-//     testItem = await createDefaultItem();
+  it('should return a default empty item', async function () {
+    testItem = await createDefaultItem();
 
-//     expect(testItem).to.have.property("title", "Test Empty Item");
-//   })
+    expect(testItem).to.have.property("title", "Test Empty Item");
+  })
 
-//   it("should return a 201 and list of existing items", async function () {
-//     const response = await request(app_.app)
-//       .get("/api/v0/items/");
+  it("should return a 201 and list of existing items", async function () {
+    const response = await request(app_.app)
+      .get("/api/v0/items/");
 
-//     expect(response.status).to.equal(201);
-//     expect(response.type).to.equal("application/json");
-//     expect(response.body.items).to.be.an("array"); 
-//     expect(response.body.items[0]).to.be.an("object");
-//   });
+    expect(response.status).to.equal(201);
+    expect(response.type).to.equal("application/json");
+    expect(response.body.items).to.be.an("array"); 
+    expect(response.body.items[0]).to.be.an("object");
+  });
 
-//   //tasks
+  //tasks
 
-//   it("should return 201 if no existing tasks", async function () {
-//     const response = await request(app_.app)
-//       .get("/api/v0/tasks/");
+  it("should return 201 if no existing tasks", async function () {
+    const response = await request(app_.app)
+      .get("/api/v0/tasks/");
 
-//     expect(response.status).to.equal(201);
-//     expect(response.type).to.equal("application/json");
-//     expect(response.body.tasks).to.be.empty;
-//   });
+    expect(response.status).to.equal(201);
+    expect(response.type).to.equal("application/json");
+    expect(response.body.tasks).to.be.empty;
+  });
   
-//   it('should return an empty task', async function () {
-//     testTask = await createTaskItem();
+  it('should return an empty task', async function () {
+    testTask = await createTaskItem();
 
-//     expect(testTask).to.have.property("title", "Test Empty Task");
-//   })
+    expect(testTask).to.have.property("title", "Test Empty Task");
+  })
 
-//   it("should return a 201 and list of existing tasks", async function () {
-//     const response = await request(app_.app)
-//       .get("/api/v0/tasks/");
+  it("should return a 201 and list of existing tasks", async function () {
+    const response = await request(app_.app)
+      .get("/api/v0/tasks/");
     
-//     expect(response.status).to.equal(201);
-//     expect(response.type).to.equal("application/json");
-//     expect(response.body.tasks).to.be.an("array"); 
-//     expect(response.body.tasks[0]).to.be.an("object");
-//   });
+    expect(response.status).to.equal(201);
+    expect(response.type).to.equal("application/json");
+    expect(response.body.tasks).to.be.an("array"); 
+    expect(response.body.tasks[0]).to.be.an("object");
+  });
 
-//   //events 
+  //events 
 
-//   it("should return 201 if no existing events", async function () {
-//     const response = await request(app_.app)
-//       .get("/api/v0/events/");
+  it("should return 201 if no existing events", async function () {
+    const response = await request(app_.app)
+      .get("/api/v0/events/");
 
-//     expect(response.status).to.equal(201);
-//     expect(response.type).to.equal("application/json");
-//     expect(response.body.events).to.be.empty;
-//   });
+    expect(response.status).to.equal(201);
+    expect(response.type).to.equal("application/json");
+    expect(response.body.events).to.be.empty;
+  });
 
-//   it('should return an empty event', async function () {
-//     testEvent = await createEventItem();
+  it('should return an empty event', async function () {
+    testEvent = await createEventItem();
 
-//     expect(testEvent).to.have.property("title", "Test Empty Event");
-//   })
+    expect(testEvent).to.have.property("title", "Test Empty Event");
+  })
 
-//   it("should return a 201 and list of existing events", async function () {
-//     const response = await request(app_.app)
-//       .get("/api/v0/events/");
+  it("should return a 201 and list of existing events", async function () {
+    const response = await request(app_.app)
+      .get("/api/v0/events/");
     
-//     expect(response.status).to.equal(201);
-//     expect(response.type).to.equal("application/json");
-//     expect(response.body.events).to.be.an("array"); 
-//     expect(response.body.events[0]).to.be.an("object");
-//   });
+    expect(response.status).to.equal(201);
+    expect(response.type).to.equal("application/json");
+    expect(response.body.events).to.be.an("array"); 
+    expect(response.body.events[0]).to.be.an("object");
+  });
 
-//   //pages
+  //pages
 
-//   it("should return 201 if no existing events", async function () {
-//     const response = await request(app_.app)
-//       .get("/api/v0/pages/");
+  it("should return 201 if no existing events", async function () {
+    const response = await request(app_.app)
+      .get("/api/v0/pages/");
 
-//     expect(response.status).to.equal(201);
-//     expect(response.type).to.equal("application/json");
-//     expect(response.body.pages).to.be.empty;
-//   });
+    expect(response.status).to.equal(201);
+    expect(response.type).to.equal("application/json");
+    expect(response.body.pages).to.be.empty;
+  });
 
-//   it('should return an empty page', async function () {
-//     testPage = await createPageItem();
+  it('should return an empty page', async function () {
+    testPage = await createPageItem();
 
-//     expect(testPage).to.have.property("title", "Test Empty Page");
-//   })
+    expect(testPage).to.have.property("title", "Test Empty Page");
+  })
 
-//   it("should return a 201 and list of existing pages", async function () {
-//     const response = await request(app_.app)
-//       .get("/api/v0/pages/");
+  it("should return a 201 and list of existing pages", async function () {
+    const response = await request(app_.app)
+      .get("/api/v0/pages/");
     
-//     expect(response.status).to.equal(201);
-//     expect(response.type).to.equal("application/json");
-//     expect(response.body.pages).to.be.an("array"); 
-//     expect(response.body.pages[0]).to.be.an("object");
-//   });
+    expect(response.status).to.equal(201);
+    expect(response.type).to.equal("application/json");
+    expect(response.body.pages).to.be.an("array"); 
+    expect(response.body.pages[0]).to.be.an("object");
+  });
 
-//   //recipes
+  //recipes
 
-//   it("should return 201 if no existing recipes", async function () {
-//     const response = await request(app_.app)
-//       .get("/api/v0/recipes/");
+  it("should return 201 if no existing recipes", async function () {
+    const response = await request(app_.app)
+      .get("/api/v0/recipes/");
 
-//     expect(response.status).to.equal(201);
-//     expect(response.type).to.equal("application/json");
-//     expect(response.body.recipes).to.be.empty;
-//   });
+    expect(response.status).to.equal(201);
+    expect(response.type).to.equal("application/json");
+    expect(response.body.recipes).to.be.empty;
+  });
 
-//   it('should return an empty page', async function () {
-//     testRecipe = await createRecipeItem();
+  it('should return an empty page', async function () {
+    testRecipe = await createRecipeItem();
 
-//     expect(testRecipe).to.have.property("title", "Test Empty Recipe");
-//   })
+    expect(testRecipe).to.have.property("title", "Test Empty Recipe");
+  })
 
-//   it("should return a 201 and list of existing recipes", async function () {
-//     const response = await request(app_.app)
-//       .get("/api/v0/recipes/");
+  it("should return a 201 and list of existing recipes", async function () {
+    const response = await request(app_.app)
+      .get("/api/v0/recipes/");
     
-//     expect(response.status).to.equal(201);
-//     expect(response.type).to.equal("application/json");
-//     expect(response.body.recipes).to.be.an("array"); 
-//     expect(response.body.recipes[0]).to.be.an("object");
-//   });
+    expect(response.status).to.equal(201);
+    expect(response.type).to.equal("application/json");
+    expect(response.body.recipes).to.be.an("array"); 
+    expect(response.body.recipes[0]).to.be.an("object");
+  });
 
-// });
+});
 
-// //#endregion
+//#endregion
 
 //#region Item Test Cases
 
@@ -388,134 +388,132 @@ describe('edit existing item', async function () {
 
 //#endregion
 
-// //#region Task Test Cases
+//#region Task Test Cases
 
-// describe('add new task item', async function () {
-//   this.timeout(2000);
-//   let app_: App;
+describe('add new task item', async function () {
+  this.timeout(2000);
+  let app_: App;
 
-//   before(async function () {
-//     await beforeEachSuite();
-//     app_ = new App();
-//   })
+  before(async function () {
+    await beforeEachSuite();
+    app_ = new App();
+  })
 
-//   //POSITIVE cases
+  //POSITIVE cases
 
-//   it("should return a 201 and the new task object", async function () {
-//     const response = await request(app_.app)
-//       .post("/api/v0/tasks/")
-//       .send({
-//         title: "test empty task",
+  it("should return a 201 and the new task object", async function () {
+    const response = await request(app_.app)
+      .post("/api/v0/tasks/")
+      .send({
+        title: "test empty task",
 
-//       });
+      });
 
-//     expect(response.status).to.equal(201);
-//     expect(response.type).to.equal("application/json");
-//     expect(response.body).to.have.property("task");
-//     expect(response.body.task).to.have.property("title", "test empty task");
-//   });
+    expect(response.status).to.equal(201);
+    expect(response.type).to.equal("application/json");
+    expect(response.body).to.have.property("task");
+    expect(response.body.task).to.have.property("title", "test empty task");
+  });
 
-//   // NEGATIVE cases 
+  // NEGATIVE cases 
   
-//   it("should return a 400 if title is missing", async function () {
-//     const response = await request(app_.app)
-//       .post("/api/v0/tasks/")
-//       .send({});
+  it("should return a 400 if title is missing", async function () {
+    const response = await request(app_.app)
+      .post("/api/v0/tasks/")
+      .send({});
   
-//     expect(response.status).to.equal(400);
-//     expect(response.type).to.equal("application/json");
-//   });
+    expect(response.status).to.equal(400);
+    expect(response.type).to.equal("application/json");
+  });
   
-// });
+});
 
-// describe("delete existing task", async function () {
-//   this.timeout(1000);
-//   let app_: App;
-//   let testItem: HydratedDocument<IItem>;
+describe("delete existing task", async function () {
+  this.timeout(1000);
+  let app_: App;
+  let testTask: HydratedDocument<ITask>;
 
-//   beforeEach(async function () {
-//     await beforeEachSuite();
-//     app_ = new App();
-//     testItem = await createDefaultItem();
-//   });
+  before(async function () {
+    await beforeEachSuite();
+    app_ = new App();
+    testTask = await createTaskItem();
+  });
 
-//   it("should return a 200 and the task object", async function () {
-//     const response = await request(app_.app)
-//       .delete(`/api/v0/tasks/${testItem._id}`)
-//       .send();
+  it("should return a 200 and the task object", async function () {
+    await request(app_.app)
+      .delete(`/api/v0/tasks/${testTask._id}`)
+      .send();
+      
+    const tasks = await request(app_.app).get("/api/v0/tasks/").send();
 
-//     expect(response.status).to.equal(200);
-//     expect(response.type).to.equal("application/json");
-//     expect(response.body.deleteTask).to.be.an("object");
-//     expect(response.body.deleteTask).to.have.property("title", "Test Empty Task");
-//   });
+    expect(tasks.status).to.equal(201);
+    expect(tasks.type).to.equal("application/json");
+    expect(tasks.body.tasks).to.be.an("array");
+    expect(
+      (tasks.body.tasks as Array<HydratedDocument<ITask>>).some(
+        (task) => task._id === testTask._id
+      )
+    ).to.be.false;
+  });
 
-//   it("should not be returned if deleted", async function () {
-//     const response = await request(app_.app)
-//       .delete(`/api/v0/tasks/${testItem._id}`)
-//       .send();
+  it("should not be returned if deleted", async function () {
+    const response = await request(app_.app)
+      .delete(`/api/v0/tasks/${testTask._id}`)
+      .send();
 
-//     expect(response.status).to.equal(200);
-//     expect(response.type).to.equal("application/json");
-//     expect(response.body.deletedItem).to.be.an("object");
-//     expect(response.body.deletedItem).to.have.property("title", "Test Empty Task");
+    expect(response.status).to.equal(500);
+    expect(response.type).to.equal("application/json");
+    
+  });
 
-//     const tasks = await request(app_.app).get("/api/v0/tasks/").send();
+});
 
-//     expect(tasks.status).to.equal(200);
-//     expect(tasks.type).to.equal("application/json");
-//     expect(tasks.body.tasks).to.be.an("array");
-//     expect(
-//       (tasks.body.tasks as Array<HydratedDocument<IItem>>).some(
-//         (task) => task._id === testItem._id
-//       )
-//     ).to.be.false;
-//   });
-// });
 
-// describe('edit existing task', async function () {
-//   this.timeout(1000);
-//   let app_: App
-//   let testItem: HydratedDocument<IItem>;
+describe('edit existing task', async function () {
+  this.timeout(1000);
+  let app_: App
+  let testItem: HydratedDocument<IItem>;
 
-//   beforeEach(async function () {
-//     await beforeEachSuite();
-//     app_ = new App();
-//     testItem = await createDefaultItem();
-//   });
+  before(async function () {
+    await beforeEachSuite();
+    app_ = new App();
+    testItem = await createTaskItem();
+  });
 
-//   it("should be able to edit modifiable fields", async function () {
-//     const response = await request.agent(app_.app)
-//       .patch(`/api/v0/tasks/${testItem._id}`)
-//       .send({
-//           description: "test task",
-//           tags: "1",
-//       });
+  it("should be able to edit modifiable fields", async function () {
+    const response = await request.agent(app_.app)
+      .patch(`/api/v0/tasks/${testItem._id}`)
+      .send({
+          description: "test task",
+          tags: [{
+            "name" : "Default"
+          }]
+      });
 
-//     expect(response.status).to.equal(200);
+    expect(response.status).to.equal(200);
 
-//     const updatedTask = await request(app_.app).get(
-//       `/api/v0/tasks/${testItem._id}`
-//     );
-//     expect(updatedTask.status).to.equal(200);
-//     expect(updatedTask.type).to.equal("application/json");
-//     expect(updatedTask.body.task).to.have.property(
-//       "description",
-//       "test task"
-//     );
-//   });
+    const updatedTask = await request(app_.app).get(
+      `/api/v0/tasks/${testItem._id}`
+    );
+    expect(updatedTask.status).to.equal(200);
+    expect(updatedTask.type).to.equal("application/json");
+    expect(updatedTask.body.task).to.have.property(
+      "description",
+      "test task"
+    );
+  });
   
-//   // it("should not be able to edit nonmodifiable fields", async function () {
-//     //Add Test
-//   // });
+  // it("should not be able to edit nonmodifiable fields", async function () {
+    //Add Test
+  // });
 
-//   // it("should only be able to edit modifiable fields", async function () {
-//     //Add test
-//   // });
+  // it("should only be able to edit modifiable fields", async function () {
+    //Add test
+  // });
   
-// });
+});
 
-// //#endregion
+//#endregion
 
 // //#region Event Test Cases
 
