@@ -515,48 +515,127 @@ describe('edit existing task', async function () {
 
 //#endregion
 
-// //#region Event Test Cases
+//#region Event Test Cases
 
-// describe('add new event item', async function () {
-//   this.timeout(2000);
-//   let app_: App;
-//   let testEvent: mongoose.HydratedDocument<IEvent>;
+describe('add new event item', async function () {
+  this.timeout(2000);
+  let app_: App;
+  let testEvent: mongoose.HydratedDocument<IEvent>;
 
-//   before(async function () {
-//     await beforeEachSuite();
-//     app_ = new App();
-//   })
+  before(async function () {
+    await beforeEachSuite();
+    app_ = new App();
+  })
 
-//   //POSITIVE cases
+  //POSITIVE cases
 
-//   it("should return a 201 and the new event object", async function () {
-//     const response = await request(app_.app)
-//       .post("/api/v0/events/")
-//       .send({
-//         title: "test empty event",
+  it("should return a 201 and the new event object", async function () {
+    const response = await request(app_.app)
+      .post("/api/v0/events/")
+      .send({
+        title: "test empty event",
 
-//       });
+      });
 
-//     expect(response.status).to.equal(201);
-//     expect(response.type).to.equal("application/json");
-//     expect(response.body).to.have.property("event");
-//     expect(response.body.event).to.have.property("title", "test empty event");
-//   });
+    expect(response.status).to.equal(201);
+    expect(response.type).to.equal("application/json");
+    expect(response.body).to.have.property("event");
+    expect(response.body.event).to.have.property("title", "test empty event");
+  });
 
-//   // NEGATIVE cases 
+  // NEGATIVE cases 
   
-//   it("should return a 400 if title is missing", async function () {
-//     const response = await request(app_.app)
-//       .post("/api/v0/events/")
-//       .send({});
+  it("should return a 400 if title is missing", async function () {
+    const response = await request(app_.app)
+      .post("/api/v0/events/")
+      .send({});
   
-//     expect(response.status).to.equal(400);
-//     expect(response.type).to.equal("application/json");
-//   });
+    expect(response.status).to.equal(400);
+    expect(response.type).to.equal("application/json");
+  });
   
-// });
+});
 
-// //#endregion
+// GET Functions
+describe('delete existing event', async function () {
+  this.timeout(1000);
+  let app_: App;
+  let testEvent: HydratedDocument<IEvent>;
+
+  before(async function () {
+      await beforeEachSuite();
+      app_ = new App();
+      testEvent = await createEventItem();
+  });
+
+  it("should return a 200 and the event object", async function () {
+      await request(app_.app)
+          .delete(`/api/v0/events/${testEvent._id}`)
+          .send();
+
+      const events = await request(app_.app).get("/api/v0/events/").send();
+
+      expect(events.status).to.equal(201);
+      expect(events.type).to.equal("application/json");
+      expect(events.body.events).to.be.an("array");
+      expect(
+          (events.body.events as Array<HydratedDocument<IEvent>>).some(
+              (event) => event._id === testEvent._id
+          )
+      ).to.be.false;
+  });
+
+  it("should not be returned if deleted", async function () {
+      const response = await request(app_.app)
+          .delete(`/api/v0/events/${testEvent._id}`)
+          .send();
+
+      expect(response.status).to.equal(500);
+      expect(response.type).to.equal("application/json");
+  });
+
+});
+
+// PATCH Functions
+describe('edit existing event', async function () {
+  this.timeout(1000);
+  let app_: App;
+  let testEvent: HydratedDocument<IEvent>;
+
+  before(async function () {
+      await beforeEachSuite();
+      app_ = new App();
+      testEvent = await createEventItem();
+  });
+
+  it("should be able to edit modifiable fields", async function () {
+      const response = await request.agent(app_.app)
+          .patch(`/api/v0/events/${testEvent._id}`)
+          .send({
+              description: "test event",
+              tags: [{
+                  name: "eventChanged"
+              }]
+          });
+
+      expect(response.status).to.equal(200);
+
+      const updatedEvent = await request(app_.app).get(
+          `/api/v0/events/${testEvent._id}`
+      );
+      expect(updatedEvent.status).to.equal(200);
+      expect(updatedEvent.type).to.equal("application/json");
+      expect(updatedEvent.body.event).to.have.property(
+          "description",
+          "test event"
+      );
+  });
+
+  // Additional tests can be added here for other scenarios.
+
+});
+
+//#endregion
 
 // //#region Page Test Cases
 
