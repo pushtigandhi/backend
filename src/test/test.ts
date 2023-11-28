@@ -18,7 +18,7 @@ import mongoose, { HydratedDocument, Types } from "mongoose";
 import { before, after, describe, it } from 'mocha';
 
 import { Item, IItem, Task, ITask, Event, IEvent,
-  Page, IPage, Recipe, IRecipe, Tag, ITag } from "../models/item.model";
+  Page, IPage, Recipe, IRecipe } from "../models/item.model";
 
 //#endregion
 
@@ -49,13 +49,6 @@ after(async function () {
 //#endregion
 
 //#region Helper Functions
-
-async function createTag(): Promise<HydratedDocument<ITag>> {
-  const tag = new Tag({
-    name: "Default"
-  })
-  return tag;
-}
 
 async function createDefaultItem(): Promise<HydratedDocument<IItem>> {
   const item = new Item({
@@ -255,58 +248,58 @@ async function createRecipeItem(): Promise<HydratedDocument<IRecipe>> {
 
 //#region Item Test Cases
 
-// describe('add new default item', async function () {
-//   this.timeout(2000);
-//   let app_: App;
-//   let testItem: mongoose.HydratedDocument<IItem>;
+describe('add new default item', async function () {
+  this.timeout(2000);
+  let app_: App;
+  let testItem: mongoose.HydratedDocument<IItem>;
 
-//   before(async function () {
-//     await beforeEachSuite();
-//     app_ = new App();
-//   })
+  before(async function () {
+    await beforeEachSuite();
+    app_ = new App();
+  })
 
-//   //POSITIVE cases
+  //POSITIVE cases
 
-//   it("should return a 201 and the new item object", async function () {
-//     //console.log("creating new!");
-//     const response = await request(app_.app)
-//       .post("/api/v0/items/")
-//       .send({
-//         title: "test empty",
+  it("should return a 201 and the new item object", async function () {
+    //console.log("creating new!");
+    const response = await request(app_.app)
+      .post("/api/v0/items/")
+      .send({
+        title: "test empty",
 
-//       });
+      });
     
-//       expect(response.status).to.equal(201);
-//       expect(response.type).to.equal("application/json");
-//       expect(response.body).to.have.property("item");
-//       expect(response.body.item).to.have.property("title", "test empty");
-//   });
+      expect(response.status).to.equal(201);
+      expect(response.type).to.equal("application/json");
+      expect(response.body).to.have.property("item");
+      expect(response.body.item).to.have.property("title", "test empty");
+  });
 
-//   it("should return a 200 and the item by ID", async function () {
-//     testItem = await createDefaultItem();
-//     const response = await request(app_.app)
-//       .get(`/api/v0/items/${testItem._id}`)
-//       .send();
+  it("should return a 200 and the item by ID", async function () {
+    testItem = await createDefaultItem();
+    const response = await request(app_.app)
+      .get(`/api/v0/items/${testItem._id}`)
+      .send();
     
-//       expect(response.status).to.equal(200);
-//       expect(response.type).to.equal("application/json");
-//       expect(response.body).to.have.property("item");
-//       expect(response.body.item).to.have.property("title", "Test Empty Item");
-//   });
+      expect(response.status).to.equal(200);
+      expect(response.type).to.equal("application/json");
+      expect(response.body).to.have.property("item");
+      expect(response.body.item).to.have.property("title", "Test Empty Item");
+  });
 
-//   // NEGATIVE cases 
+  // NEGATIVE cases 
 
-//   it("should return a 400 if title is missing", async function () {
-//     //console.log("creating new!");
-//     const response = await request(app_.app)
-//       .post("/api/v0/items/")
-//       .send({});
+  it("should return a 400 if title is missing", async function () {
+    //console.log("creating new!");
+    const response = await request(app_.app)
+      .post("/api/v0/items/")
+      .send({});
     
-//       expect(response.status).to.equal(400);
-//       expect(response.type).to.equal("application/json");
-//   });
+      expect(response.status).to.equal(400);
+      expect(response.type).to.equal("application/json");
+  });
   
-// });
+});
 
 describe("delete existing item", async function () {
   this.timeout(1000);
@@ -348,37 +341,40 @@ describe("delete existing item", async function () {
 
 });
 
-// describe('edit existing item', async function () {
-//   this.timeout(1000);
-//   let app_: App
-//   let testItem: HydratedDocument<IItem>;
+describe('edit existing item', async function () {
+  this.timeout(1000);
+  let app_: App
+  let testItem: HydratedDocument<IItem>;
 
-//   before(async function () {
-//     await beforeEachSuite();
-//     app_ = new App();
-//     testItem = await createDefaultItem();
-//   });
+  before(async function () {
+    await beforeEachSuite();
+    app_ = new App();
+    testItem = await createDefaultItem();
+  });
 
-//   it("should be able to edit modifiable fields", async function () {
-//     const response = await request.agent(app_.app)
-//       .patch(`/api/v0/items/${testItem._id}`)
-//       .send({
-//           description: "test item",
-//           tags: new Tag 
-//       });
+  it("should be able to edit modifiable fields", async function () {
+    const response = await request.agent(app_.app)
+      .patch(`/api/v0/items/${testItem._id}`)
+      .send({
+          description: "test item",
+          tags: [{
+            name: "Default"
+          }]
+      });
 
-//     expect(response.status).to.equal(200);
+    expect(response.status).to.equal(200);
 
-//     const updatedItem = await request(app_.app).get(
-//       `/api/v0/items/${testItem._id}`
-//     );
-//     expect(updatedItem.status).to.equal(200);
-//     expect(updatedItem.type).to.equal("application/json");
-//     expect(updatedItem.body.listing).to.have.property(
-//       "description",
-//       "test item"
-//     );
-//   });
+    const updatedItem = await request(app_.app).get(
+      `/api/v0/items/${testItem._id}`
+    );
+    expect(updatedItem.status).to.equal(200);
+    expect(updatedItem.type).to.equal("application/json");
+    expect(updatedItem.body.item).to.have.property(
+      "description",
+      "test item"
+    );
+
+  });
   
 //   // it("should not be able to edit nonmodifiable fields", async function () {
 //     //Add Test
@@ -388,7 +384,7 @@ describe("delete existing item", async function () {
 //     //Add test
 //   // });
 
-// });
+});
 
 //#endregion
 

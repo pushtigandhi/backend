@@ -27,7 +27,7 @@ import ContactCard,{IContactCard} from "./contactcard.model";
 //     }
 // });
 
-export interface ITag {
+interface ITag {
     name: string;
     color: string;
 }
@@ -87,7 +87,7 @@ const itemSchema = new mongoose.Schema(
             contentType: String,
         },
         tags: {
-            type: [Schema.Types.ObjectId],
+            type: [tagSchema],
         },
         description: {
             type: String,
@@ -195,6 +195,5 @@ export const Task = model<ITask>('Task', taskSchema);
 export const Event = model<IEvent>('Event', eventSchema);
 export const Page = model<IPage>('Page', pageSchema);
 export const Recipe = model<IRecipe>('Recipe', recipeSchema);
-export const Tag = model<ITag>('Tag', tagSchema);
 
 //export default Item;
