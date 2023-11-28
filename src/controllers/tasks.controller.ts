@@ -67,7 +67,7 @@ export default class TaskController {
 
             const deletedTask = await this.taskService.deletedTask(taskId_);
             if (!deletedTask) {
-                console.error(`Item ${taskId} not found during deletion`);
+                console.error(`Task ${taskId} not found during deletion`);
                 return res.status(500).json({ error: 'Server error' });
             }
             return res.status(200).json({ deletedTask });
