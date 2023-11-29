@@ -517,47 +517,56 @@ describe('edit existing task', async function () {
 
 //#region Event Test Cases
 
-describe('add new event item', async function () {
+describe('add new default event', async function () {
   this.timeout(2000);
   let app_: App;
   let testEvent: mongoose.HydratedDocument<IEvent>;
 
   before(async function () {
-    await beforeEachSuite();
-    app_ = new App();
+      await beforeEachSuite();
+      app_ = new App();
   })
 
   //POSITIVE cases
 
   it("should return a 201 and the new event object", async function () {
-    const response = await request(app_.app)
-      .post("/api/v0/events/")
-      .send({
-        title: "test empty event",
+      const response = await request(app_.app)
+          .post("/api/v0/events/")
+          .send({
+              title: "test empty",
+          });
 
-      });
-
-    expect(response.status).to.equal(201);
-    expect(response.type).to.equal("application/json");
-    expect(response.body).to.have.property("event");
-    expect(response.body.event).to.have.property("title", "test empty event");
+      expect(response.status).to.equal(201);
+      expect(response.type).to.equal("application/json");
+      expect(response.body).to.have.property("event");
+      expect(response.body.event).to.have.property("title", "test empty");
   });
 
-  // NEGATIVE cases 
-  
+  it("should return a 200 and the event by ID", async function () {
+      testEvent = await createDefaultEvent();
+      const response = await request(app_.app)
+          .get(`/api/v0/events/${testEvent._id}`)
+          .send();
+
+      expect(response.status).to.equal(200);
+      expect(response.type).to.equal("application/json");
+      expect(response.body).to.have.property("event");
+      expect(response.body.event).to.have.property("title", "Test Empty Event");
+  });
+
+  // NEGATIVE cases
+
   it("should return a 400 if title is missing", async function () {
-    const response = await request(app_.app)
-      .post("/api/v0/events/")
-      .send({});
-  
-    expect(response.status).to.equal(400);
-    expect(response.type).to.equal("application/json");
+      const response = await request(app_.app)
+          .post("/api/v0/events/")
+          .send({});
+
+      expect(response.status).to.equal(400);
+      expect(response.type).to.equal("application/json");
   });
-  
 });
 
-// GET Functions
-describe('delete existing event', async function () {
+describe("delete existing event", async function () {
   this.timeout(1000);
   let app_: App;
   let testEvent: HydratedDocument<IEvent>;
@@ -593,13 +602,11 @@ describe('delete existing event', async function () {
       expect(response.status).to.equal(500);
       expect(response.type).to.equal("application/json");
   });
-
 });
 
-// PATCH Functions
 describe('edit existing event', async function () {
   this.timeout(1000);
-  let app_: App;
+  let app_: App
   let testEvent: HydratedDocument<IEvent>;
 
   before(async function () {
@@ -614,7 +621,7 @@ describe('edit existing event', async function () {
           .send({
               description: "test event",
               tags: [{
-                  name: "eventChanged"
+                  name: "Default"
               }]
           });
 
@@ -630,9 +637,6 @@ describe('edit existing event', async function () {
           "test event"
       );
   });
-
-  // Additional tests can be added here for other scenarios.
-
 });
 
 //#endregion

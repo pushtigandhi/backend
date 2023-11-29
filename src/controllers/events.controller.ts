@@ -37,14 +37,14 @@ export default class EventsController {
 
     public addEvent = async (req: Request, res: Response) => {
         let newEvent = req.body;
-        
+
         try {
             newEvent = _.pick(newEvent, ["title"]);
 
             const missingFields = _.difference(["title"], Object.keys(newEvent));
             if (missingFields.length > 0) {
-                return res.status(400).json({ error: 'Missing required fields', missingFields});
-            } 
+                return res.status(400).json({ error: 'Missing required fields', missingFields });
+            }
 
             const event = await this.eventService.addEvent(newEvent);
             res.status(201).json({ event });
@@ -56,39 +56,29 @@ export default class EventsController {
         }
     }
 
-    // DELETE Functions
     public deleteEvent = async (req: Request, res: Response) => {
         const { id: eventId } = req.params;
-
         try {
             if (!isValidObjectId(eventId)) {
                 return res.status(400).json({ error: 'Invalid event ID' });
             }
             const eventId_ = new Types.ObjectId(eventId);
 
-            const result = await this.eventService.deleteEvent(
-                eventId_
-            );
-
-            if (!result) {
-                return res.status(500).json({
-                    error: "server error",
-                });
-            } else {
-                return res.status(200).json({
-                    message: "Successfully deleted",
-                    event: result,
-                });
+            const deletedEvent = await this.eventService.deleteEvent(eventId_);
+            if (!deletedEvent) {
+                console.error(`Event ${eventId} not found during deletion`);
+                return res.status(500).json({ error: 'Server error' });
             }
-        } catch (error: any) {
+
+            return res.status(200).json({ deletedEvent });
+        } catch (error) {
             console.error(error);
             res.status(500).json({
-                message: "Server error",
+                message: "server error"
             });
         }
     }
 
-    // EDIT Functions
     public editEvent = async (req: Request, res: Response) => {
         const { id: eventId } = req.params;
 
@@ -99,6 +89,7 @@ export default class EventsController {
             const eventId_ = new Types.ObjectId(eventId);
 
             const update = _.pick(req.body, [
+                "title",
                 "description",
                 "tags"
             ]);
