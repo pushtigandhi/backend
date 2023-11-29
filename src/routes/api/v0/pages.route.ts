@@ -12,6 +12,9 @@ export default class PageRoute implements Route {
 
     private initializeRoutes() {
         this.router.get('/', this.pageController.getPages);
+        this.router.get('/:id', this.pageController.getPageById);
         this.router.post('/', this.pageController.addPage);
+        this.router.delete('/:id', this.pageController.deletePage);
+        this.router.patch('/:id', this.pageController.editPage);
     }
 }

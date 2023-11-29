@@ -87,7 +87,7 @@ const itemSchema = new mongoose.Schema(
             contentType: String,
         },
         tags: {
-            type: [Schema.Types.ObjectId],
+            type: [tagSchema],
         },
         description: {
             type: String,
