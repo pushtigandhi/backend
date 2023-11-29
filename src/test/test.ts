@@ -58,7 +58,7 @@ async function createDefaultItem(): Promise<HydratedDocument<IItem>> {
   return item;
 }
 
-async function createTaskItem(): Promise<HydratedDocument<ITask>> {
+async function createDefaultTask(): Promise<HydratedDocument<ITask>> {
   const task = new Task({
      title: "Test Empty Task"
   });
@@ -66,7 +66,7 @@ async function createTaskItem(): Promise<HydratedDocument<ITask>> {
   return task;
 }
 
-async function createEventItem(): Promise<HydratedDocument<IEvent>> {
+async function createDefaultEvent(): Promise<HydratedDocument<IEvent>> {
   const event = new Event({
      title: "Test Empty Event"
   });
@@ -74,7 +74,7 @@ async function createEventItem(): Promise<HydratedDocument<IEvent>> {
   return event;
 }
 
-async function createPageItem(): Promise<HydratedDocument<IPage>> {
+async function createDefaultPage(): Promise<HydratedDocument<IPage>> {
   const page = new Page({
      title: "Test Empty Page"
   });
@@ -82,7 +82,7 @@ async function createPageItem(): Promise<HydratedDocument<IPage>> {
   return page;
 }
 
-async function createRecipeItem(): Promise<HydratedDocument<IRecipe>> {
+async function createDefaultRecipe(): Promise<HydratedDocument<IRecipe>> {
   const recipe = new Recipe({
      title: "Test Empty Recipe"
   });
@@ -146,7 +146,7 @@ describe('get default items', function () {
   });
   
   it('should return an empty task', async function () {
-    testTask = await createTaskItem();
+    testTask = await createDefaultTask();
 
     expect(testTask).to.have.property("title", "Test Empty Task");
   })
@@ -173,7 +173,7 @@ describe('get default items', function () {
   });
 
   it('should return an empty event', async function () {
-    testEvent = await createEventItem();
+    testEvent = await createDefaultEvent();
 
     expect(testEvent).to.have.property("title", "Test Empty Event");
   })
@@ -200,7 +200,7 @@ describe('get default items', function () {
   });
 
   it('should return an empty page', async function () {
-    testPage = await createPageItem();
+    testPage = await createDefaultPage();
 
     expect(testPage).to.have.property("title", "Test Empty Page");
   })
@@ -227,7 +227,7 @@ describe('get default items', function () {
   });
 
   it('should return an empty page', async function () {
-    testRecipe = await createRecipeItem();
+    testRecipe = await createDefaultRecipe();
 
     expect(testRecipe).to.have.property("title", "Test Empty Recipe");
   })
@@ -436,7 +436,7 @@ describe("delete existing task", async function () {
   before(async function () {
     await beforeEachSuite();
     app_ = new App();
-    testTask = await createTaskItem();
+    testTask = await createDefaultTask();
   });
 
   it("should return a 200 and the task object", async function () {
@@ -477,7 +477,7 @@ describe('edit existing task', async function () {
   before(async function () {
     await beforeEachSuite();
     app_ = new App();
-    testItem = await createTaskItem();
+    testItem = await createDefaultTask();
   });
 
   it("should be able to edit modifiable fields", async function () {
@@ -565,7 +565,7 @@ describe('delete existing event', async function () {
   before(async function () {
       await beforeEachSuite();
       app_ = new App();
-      testEvent = await createEventItem();
+      testEvent = await createDefaultEvent();
   });
 
   it("should return a 200 and the event object", async function () {
@@ -605,7 +605,7 @@ describe('edit existing event', async function () {
   before(async function () {
       await beforeEachSuite();
       app_ = new App();
-      testEvent = await createEventItem();
+      testEvent = await createDefaultEvent();
   });
 
   it("should be able to edit modifiable fields", async function () {
@@ -637,48 +637,121 @@ describe('edit existing event', async function () {
 
 //#endregion
 
-// //#region Page Test Cases
+//#region Page Test Cases
 
-// describe('add new page item', async function () {
-//   this.timeout(2000);
-//   let app_: App;
-//   let testPage: mongoose.HydratedDocument<IPage>;
+describe('add new page item', async function () {
+  this.timeout(2000);
+  let app_: App;
+  let testPage: mongoose.HydratedDocument<IPage>;
 
-//   before(async function () {
-//     await beforeEachSuite();
-//     app_ = new App();
-//   })
+  before(async function () {
+    await beforeEachSuite();
+    app_ = new App();
+  })
 
-//   //POSITIVE cases
+  //POSITIVE cases
 
-//   it("should return a 201 and the new page object", async function () {
-//     const response = await request(app_.app)
-//       .post("/api/v0/pages/")
-//       .send({
-//         title: "test empty page",
+  it("should return a 201 and the new page object", async function () {
+    const response = await request(app_.app)
+      .post("/api/v0/pages/")
+      .send({
+        title: "test empty page",
 
-//       });
+      });
 
-//     expect(response.status).to.equal(201);
-//     expect(response.type).to.equal("application/json");
-//     expect(response.body).to.have.property("page");
-//     expect(response.body.page).to.have.property("title", "test empty page");
-//   });
+    expect(response.status).to.equal(201);
+    expect(response.type).to.equal("application/json");
+    expect(response.body).to.have.property("page");
+    expect(response.body.page).to.have.property("title", "test empty page");
+  });
 
-//   // NEGATIVE cases 
+  // NEGATIVE cases 
   
-//   it("should return a 400 if title is missing", async function () {
-//     const response = await request(app_.app)
-//       .post("/api/v0/pages/")
-//       .send({});
+  it("should return a 400 if title is missing", async function () {
+    const response = await request(app_.app)
+      .post("/api/v0/pages/")
+      .send({});
   
-//     expect(response.status).to.equal(400);
-//     expect(response.type).to.equal("application/json");
-//   });
+    expect(response.status).to.equal(400);
+    expect(response.type).to.equal("application/json");
+  });
   
-// });
+});
 
-// //#endregion
+describe("delete existing page", async function () {
+  this.timeout(1000);
+  let app_: App;
+  let testPage: HydratedDocument<IPage>;
+
+  before(async function () {
+      await beforeEachSuite();
+      app_ = new App();
+      testPage = await createDefaultPage();
+  });
+
+  it("should return a 200 and the page object", async function () {
+      await request(app_.app)
+          .delete(`/api/v0/pages/${testPage._id}`)
+          .send();
+          
+      const pages = await request(app_.app).get("/api/v0/pages/").send();
+
+      expect(pages.status).to.equal(201);
+      expect(pages.type).to.equal("application/json");
+      expect(pages.body.pages).to.be.an("array");
+      expect(
+          (pages.body.pages as Array<HydratedDocument<IPage>>).some(
+              (page) => page._id === testPage._id
+          )
+      ).to.be.false;
+  });
+
+  it("should not be returned if deleted", async function () {
+      const response = await request(app_.app)
+          .delete(`/api/v0/pages/${testPage._id}`)
+          .send();
+
+      expect(response.status).to.equal(500);
+      expect(response.type).to.equal("application/json");
+  });
+});
+
+describe('edit existing page', async function () {
+  this.timeout(1000);
+  let app_: App;
+  let testPage: HydratedDocument<IPage>;
+
+  before(async function () {
+      await beforeEachSuite();
+      app_ = new App();
+      testPage = await createDefaultPage();
+  });
+
+  it("should be able to edit modifiable fields", async function () {
+      const response = await request.agent(app_.app)
+          .patch(`/api/v0/pages/${testPage._id}`)
+          .send({
+              description: "test page",
+              tags: [{
+                  name: "Default"
+              }]
+          });
+
+      expect(response.status).to.equal(200);
+
+      const updatedPage = await request(app_.app).get(
+          `/api/v0/pages/${testPage._id}`
+      );
+      expect(updatedPage.status).to.equal(200);
+      expect(updatedPage.type).to.equal("application/json");
+      expect(updatedPage.body.page).to.have.property(
+          "description",
+          "test page"
+      );
+  });
+});
+
+//#endregion
 
 // //#region Recipe Test Cases
 
