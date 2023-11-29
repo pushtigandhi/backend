@@ -757,50 +757,130 @@ describe('edit existing page', async function () {
 
 //#endregion
 
-// //#region Recipe Test Cases
+//#region Recipe Test Cases
 
-// describe('add new recipe item', async function () {
-//   this.timeout(2000);
-//   let app_: App;
-//   let testRecipe: mongoose.HydratedDocument<IPage>;
+describe('add new default recipe', async function () {
+  this.timeout(2000);
+  let app_: App;
+  let testRecipe: mongoose.HydratedDocument<IRecipe>;
 
-//   before(async function () {
-//     await beforeEachSuite();
-//     app_ = new App();
-//   })
+  before(async function () {
+      await beforeEachSuite();
+      app_ = new App();
+  })
 
-//   //POSITIVE cases
+  // POSITIVE cases
 
-//   it("should return a 201 and the new recipe object", async function () {
-//     const response = await request(app_.app)
-//       .post("/api/v0/recipes/")
-//       .send({
-//         title: "test empty recipe",
+  it("should return a 201 and the new recipe object", async function () {
+      const response = await request(app_.app)
+          .post("/api/v0/recipes/")
+          .send({
+              title: "test empty",
+          });
 
-//       });
+      expect(response.status).to.equal(201);
+      expect(response.type).to.equal("application/json");
+      expect(response.body).to.have.property("recipe");
+      expect(response.body.recipe).to.have.property("title", "test empty");
+  });
 
-//     expect(response.status).to.equal(201);
-//     expect(response.type).to.equal("application/json");
-//     expect(response.body).to.have.property("recipe");
-//     expect(response.body.recipe).to.have.property("title", "test empty recipe");
-//   });
+  it("should return a 200 and the recipe by ID", async function () {
+      testRecipe = await createDefaultRecipe();
+      const response = await request(app_.app)
+          .get(`/api/v0/recipes/${testRecipe._id}`)
+          .send();
 
-//   // NEGATIVE cases 
-  
-//   it("should return a 400 if title is missing", async function () {
-//     const response = await request(app_.app)
-//       .post("/api/v0/recipes/")
-//       .send({});
-  
-//     expect(response.status).to.equal(400);
-//     expect(response.type).to.equal("application/json");
-//   });
-  
-// });
+      expect(response.status).to.equal(200);
+      expect(response.type).to.equal("application/json");
+      expect(response.body).to.have.property("recipe");
+      expect(response.body.recipe).to.have.property("title", "Test Empty Recipe");
+  });
 
-// function beforeEach(arg0: () => Promise<void>) {
-//   throw new Error("Function not implemented.");
-// }
-// //#endregion
+  // NEGATIVE cases
+
+  it("should return a 400 if title is missing", async function () {
+      const response = await request(app_.app)
+          .post("/api/v0/recipes/")
+          .send({});
+
+      expect(response.status).to.equal(400);
+      expect(response.type).to.equal("application/json");
+  });
+});
+
+describe("delete existing recipe", async function () {
+  this.timeout(1000);
+  let app_: App;
+  let testRecipe: HydratedDocument<IRecipe>;
+
+  before(async function () {
+      await beforeEachSuite();
+      app_ = new App();
+      testRecipe = await createDefaultRecipe();
+  });
+
+  it("should return a 200 and the recipe object", async function () {
+      await request(app_.app)
+          .delete(`/api/v0/recipes/${testRecipe._id}`)
+          .send();
+
+      const recipes = await request(app_.app).get("/api/v0/recipes/").send();
+
+      expect(recipes.status).to.equal(201);
+      expect(recipes.type).to.equal("application/json");
+      expect(recipes.body.recipes).to.be.an("array");
+      expect(
+          (recipes.body.recipes as Array<HydratedDocument<IRecipe>>).some(
+              (recipe) => recipe._id === testRecipe._id
+          )
+      ).to.be.false;
+  });
+
+  it("should not be returned if deleted", async function () {
+      const response = await request(app_.app)
+          .delete(`/api/v0/recipes/${testRecipe._id}`)
+          .send();
+
+      expect(response.status).to.equal(500);
+      expect(response.type).to.equal("application/json");
+  });
+});
+
+describe('edit existing recipe', async function () {
+  this.timeout(1000);
+  let app_: App
+  let testRecipe: HydratedDocument<IRecipe>;
+
+  before(async function () {
+      await beforeEachSuite();
+      app_ = new App();
+      testRecipe = await createDefaultRecipe();
+  });
+
+  it("should be able to edit modifiable fields", async function () {
+      const response = await request.agent(app_.app)
+          .patch(`/api/v0/recipes/${testRecipe._id}`)
+          .send({
+              description: "test recipe",
+              tags: [{
+                  name: "Default"
+              }]
+          });
+
+      expect(response.status).to.equal(200);
+
+      const updatedRecipe = await request(app_.app).get(
+          `/api/v0/recipes/${testRecipe._id}`
+      );
+      expect(updatedRecipe.status).to.equal(200);
+      expect(updatedRecipe.type).to.equal("application/json");
+      expect(updatedRecipe.body.recipe).to.have.property(
+          "description",
+          "test recipe"
+      );
+  });
+});
+
+//#endregion
 
 

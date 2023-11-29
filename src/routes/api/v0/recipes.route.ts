@@ -12,6 +12,9 @@ export default class RecipeRoute implements Route {
 
     private initializeRoutes() {
         this.router.get('/', this.recipeController.getRecipes);
+        this.router.get('/:id', this.recipeController.getRecipeById);
         this.router.post('/', this.recipeController.addRecipe);
+        this.router.delete('/:id', this.recipeController.deleteRecipe);
+        this.router.patch('/:id', this.recipeController.editRecipe);
     }
 }
