@@ -1,5 +1,5 @@
 import { Strategy as JwtStrategy, ExtractJwt } from "passport-jwt";
-import User, { IUser } from "@models/users";
+import User, { IUser } from "@/models/users.model";
 import { HydratedDocument } from "mongoose";
 import IJwtPayload from "@interfaces/jwt_payload.interface";
 
