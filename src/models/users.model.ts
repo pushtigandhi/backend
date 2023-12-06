@@ -1,13 +1,13 @@
 
-import { Schema, model, CallbackError } from 'mongoose';
+import mongoose, { Document, Schema, model, CallbackError } from 'mongoose';
 import bcrypt from 'bcrypt';
 
 const HASH_ROUNDS = 10; // 10 hash rounds for bcrypt
 
-export interface IUser {
+export interface IUser{
     email: string;
     password: string; // the hash of the password
-    emailVerificationInfo: {
+    emailVerification: {
         isVerified: boolean;
         token: {
             value: string;
@@ -27,7 +27,7 @@ const userSchema = new Schema<IUser>({
         type: String,
         required: true,
     },
-    emailVerificationInfo: {
+    emailVerification: {
         isVerified: {
             type: Boolean,
             required: true,

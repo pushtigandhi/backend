@@ -1,5 +1,8 @@
 import express from 'express';
 import indexRoute from './routes/router';
+import passport from 'passport';
+import authStrategy from './passport/authStrategy';
+import User from 'models/users.model';
 
 export default class App {
     public app: express.Application;
@@ -12,10 +15,6 @@ export default class App {
         this.useMiddleware().then(() => {
             this.mountRoutes();
         });
-
-        // console.log(
-        //     "constructing app"
-        // );
     }
 
     private mountRoutes(): void {
@@ -25,5 +24,27 @@ export default class App {
 
     private async useMiddleware(): Promise<void> {
         this.app.use(express.json());
+        this.app.use(passport.initialize());
+        this.initPassport();
+    }
+
+    private initPassport(): void {
+        passport.use(authStrategy);
+        passport.serializeUser(function(user, done) {
+            // process.nextTick(function() {
+            //     return done(null, user._id);
+            // });
+        });
+        
+        passport.deserializeUser(function(id, done) {
+            // User.findById(id, function(err: any, user: Express.User) {
+            //     if (err) {
+            //         done(err);
+            //     }
+            //     done(err, {
+            //         _id: user._id,
+            //     });
+            // });
+        });
     }
 }

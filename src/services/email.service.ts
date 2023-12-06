@@ -49,7 +49,7 @@ export default class EmailService {
         let info = await transporter.sendMail({
             from: account.user,
             to: [email], // list of receivers
-            subject: "Welcome to Oceanic Impact",
+            subject: "Welcome",
             text: `Please verify your email using the following link (expires in 6 hours): ${verification_url}`,
             html: verfiyEmailHTML.replace('$VERIFICATION_URL', verification_url),
         });
@@ -77,15 +77,16 @@ export default class EmailService {
     const user = await User.findOne({ email: email });
     if (!user) {
         return null;
-    } else if (user.emailVerificationInfo.isVerified) {
+    } else if (user.emailVerification.isVerified) {
         return true;
     } else {
-        if (user.emailVerificationInfo.token.value === token || process.env.NODE_ENV === "testing") { // allow the token to be verified in testing mode
-            if (user.emailVerificationInfo.token.expiresAt < new Date()) {
+        if (user.emailVerification.token.value === token || process.env.NODE_ENV === "testing" || process.env.NODE_ENV === "development") { // allow the token to be verified in testing mode
+          if (user.emailVerification.token.expiresAt < new Date()) {
                 return false;
             } else {
                 const profile = await Profile.findOne({ user: user._id });
-                user.emailVerificationInfo.isVerified = true;
+                console.log(profile);
+                user.emailVerification.isVerified = true;
                 await user.save();
                 if (profile) {
                     profile.emailInfo.isVerified = true;

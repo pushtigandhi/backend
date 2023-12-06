@@ -61,7 +61,7 @@ export default class AuthController {
     }
     const email = email_.toLowerCase();
     try {
-      const loginResponse = await this.authService.login(email, password);
+      const loginResponse = await this.authService.login(email_, password);
       if (loginResponse.token) {
         return res.status(200)
           .set("Authorization", `JWT ${loginResponse.token}`) // set the JWT in the header

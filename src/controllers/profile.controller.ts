@@ -7,8 +7,9 @@ export default class ProfileController {
 
   public getMe = async (req: Request, res: Response) => {
     try {
+      const id = req.params.id;
       const profile = await this.profileService.getProfileByUserId(
-        req.user!.id
+        id
       ); // req.user is set by passport in middleware
       if (!profile) {
         return res.status(404).json({ error: "Profile not found for user" });
@@ -47,8 +48,10 @@ export default class ProfileController {
 
   public editProfile = async (req: Request, res: Response) => {
     try {
+      const id = req.params.id;
+
       const profile = await this.profileService.getProfileByUserId(
-        req.user!._id
+        id
       ); // req.user is set by passport in middleware
       if (!profile) {
         return res.status(404).json({ error: "Profile not found for user" });

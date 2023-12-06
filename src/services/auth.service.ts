@@ -32,13 +32,13 @@ export default class AuthService {
         const user: HydratedDocument<IUser> | null = await User.findOne({
             email: email,
         });
-
+        const users = await User.find({}, { _id: 1, email: 1 });
         if (!user) {
             return { success: false, message: "User not found" };
         } else {
             const isValid = await user.validatePassword(password);
             if (isValid) {
-                if (!user.emailVerificationInfo.isVerified) {
+                if (!user.emailVerification.isVerified) {
                     return { message: "Email is not yet verified.", success: false };
                 }
                 
@@ -61,7 +61,7 @@ export default class AuthService {
         const newUser = new this.users_model({
             email,
             password,
-            emailVerificationInfo: {
+            emailVerification: {
                 isVerified: false,
                 token: {
                     value: await this.generateNewToken(),
@@ -91,14 +91,14 @@ export default class AuthService {
         if (!user) {
             return null;
         } else {
-            if (user.emailVerificationInfo.isVerified) {
+            if (user.emailVerification.isVerified) {
                 return null;
             } else {
-                user.emailVerificationInfo.token.value = await this.generateNewToken();
-                user.emailVerificationInfo.token.expiresAt = new Date(Date.now() + parseInt(process.env.EMAIL_TOKEN_AGE || "2160000")); // extend the token age
+                user.emailVerification.token.value = await this.generateNewToken();
+                user.emailVerification.token.expiresAt = new Date(Date.now() + parseInt(process.env.EMAIL_TOKEN_AGE || "2160000")); // extend the token age
                 await user.save();
 
-                const sentEmail = await emailService.sendVerificationEmail(user.email, user.emailVerificationInfo.token.value);
+                const sentEmail = await emailService.sendVerificationEmail(user.email, user.emailVerification.token.value);
 
                 return sentEmail;
             }
