@@ -1,33 +1,6 @@
 import mongoose, { Schema, model } from "mongoose";
-import ContactCard,{IContactCard} from "./contactcard.model";
 
-// interface IAddress {
-//     street: string,
-//     city: string,
-//     state: string,
-//     postalCode: string,
-// }
-
-// const addressSchema = new mongoose.Schema({
-//   street: {
-//       type: String,
-//       required: true,
-//     },
-//   city: {
-//       type: String,
-//       required: true,
-//     },
-//   state: {
-//       type: String,
-//       required: true,
-//     },
-//   postalCode: {
-//       type: String,
-//       required: true,
-//     }
-// });
-
-interface ITag {
+export interface ITag {
     name: string;
     color: string;
 }
@@ -188,12 +161,11 @@ const recipeSchema = new Schema({
     }
 });
 
-// const Recipe = Item.discriminator('Recipe', recipeSchema);
-
 export const Item = model<IItem>('Item', itemSchema);
 export const Task = model<ITask>('Task', taskSchema);
 export const Event = model<IEvent>('Event', eventSchema);
 export const Page = model<IPage>('Page', pageSchema);
 export const Recipe = model<IRecipe>('Recipe', recipeSchema);
+export const Tag = model<ITag>('Tag', tagSchema);
 
 //export default Item;
