@@ -11,6 +11,7 @@ import recipesRoute from "./recipes.route";
 import usersRoute from "./users.route";
 import profileRoute from "./profile.route";
 import authRoute from "./auth.route";
+import contactsRoute from "./contacts.route";
 
 export default class v0Route {
   public router: Router = Router();
@@ -28,6 +29,7 @@ export default class v0Route {
     const usersRouter_ = new usersRoute();
     const profileRouter_ = new profileRoute();
     const authRouter_ = new authRoute();
+    const contactsRoute_ = new contactsRoute();
     this.router.use("/items", itemsRouter_.router);
     this.router.use("/tasks", tasksRouter_.router);
     this.router.use("/events", eventsRouter_.router);
@@ -36,5 +38,6 @@ export default class v0Route {
     this.router.use("/users", usersRouter_.router);
     this.router.use("/profile", profileRouter_.router);
     this.router.use("/auth", authRouter_.router);
+    this.router.use("/contacts", contactsRoute_.router);
   }
 }
