@@ -1,13 +1,13 @@
 import { Strategy as JwtStrategy, ExtractJwt } from "passport-jwt";
-import User, { IUser } from "@models/users";
+import User, { IUser } from "../models/users.model";
 import { HydratedDocument } from "mongoose";
-import IJwtPayload from "@interfaces/jwt_payload.interface";
+import IJwtPayload from "../interfaces/jwt_payload.interface";
 
 const localStrategy = new JwtStrategy({
-    jwtFromRequest: ExtractJwt.fromAuthHeaderWithScheme("JWT"), // e.g. Authorization: JWT <token>
+    jwtFromRequest: ExtractJwt.fromAuthHeaderWithScheme("JWT"),
     secretOrKey: process.env.JWT_SECRET || "supersecret",
     jsonWebTokenOptions: {
-        maxAge: process.env.JWT_MAX_AGE || "30d", // 30 days default
+        maxAge: process.env.JWT_MAX_AGE || "30d",
     }
 }, async function verify(
     jwt_payload: IJwtPayload,
@@ -21,14 +21,12 @@ const localStrategy = new JwtStrategy({
         if (!user) {
             return cb(null, false, { message: "Bad JWT" });
         } else {
-            if (!user.emailVerificationInfo.isVerified) {
+            if (!user.emailVerification.isVerified) {
                 return cb(null, false, { message: "Email is not yet verified." });
             }
-
-            return cb(null, {
-                _id: user._id,
-                email: user.email,
-            });
+            var arg = { _id: user._id,
+                email: user.email, };
+            return cb(null, user, arg);
         }
     } catch (e) {
         return cb(e);

@@ -15,10 +15,13 @@ import { MongoMemoryServer } from "mongodb-memory-server";
 import App from "../app";
 import mongoose, { HydratedDocument, Types } from "mongoose";
 
-import { before, after, describe, it } from 'mocha';
+import { before, beforeEach, after, describe, it } from 'mocha';
 
 import { Item, IItem, Task, ITask, Event, IEvent,
   Page, IPage, Recipe, IRecipe } from "../models/item.model";
+
+import User, { IUser } from "../models/users.model";
+import Profile, { IProfile } from "../models/profile.model";
 
 //#endregion
 
@@ -38,6 +41,7 @@ async function beforeEachSuite() {
   await Task.deleteMany({});
   await Event.deleteMany({});
   await Page.deleteMany({});
+  await User.deleteMany({});
 }
 
 after(async function () {
@@ -49,6 +53,50 @@ after(async function () {
 //#endregion
 
 //#region Helper Functions
+
+async function createTestUser(
+  email: string = "testuser@example.com"
+): Promise<HydratedDocument<IUser>> {
+  const user = new User({
+    email: email,
+    password: "test",
+    emailVerification: {
+      isVerified: true,
+      token: {
+        value: "test",
+        expiresAt: new Date(),
+      },
+    },
+  });
+
+  return await user.save();
+}
+
+async function createTestProfile(
+  user_id: Types.ObjectId
+): Promise<HydratedDocument<IProfile>> {
+  // create profile
+  const user = await User.findOne({ _id: user_id })
+  return await Profile.create({
+    user: user_id,
+    avatarImage: null,
+    bio: "testbio",
+    displayName: "test",
+    emailInfo: {
+      isVerified: true,
+      email: user!.email, // should not be null user
+    }
+  });
+}
+
+async function loginTestUser(request: request.SuperTest<request.Test>) {
+  const response = await request.post("/api/v0/auth/login").send({
+    email: "testuser@example.com",
+    password: "test",
+  });
+
+  return response.headers["authorization"];
+}
 
 async function createDefaultItem(): Promise<HydratedDocument<IItem>> {
   const item = new Item({
@@ -91,7 +139,267 @@ async function createDefaultRecipe(): Promise<HydratedDocument<IRecipe>> {
 }
 //#endregion
 
-//#region Inialization
+//#region User Test Cases
+
+describe("get all users", async function () {
+  this.timeout(1000);
+  let app_: App;
+  let testUser: mongoose.HydratedDocument<IUser>;
+
+  before(async function () {
+    await beforeEachSuite();
+    app_ = new App();
+    testUser = await createTestUser();
+  });
+
+  it("should return a 200 and a list of existing users", async function () {
+    const users = await request(app_.app).get("/api/v0/users");
+
+    expect(users.status).to.equal(200);
+    expect(users.type).to.equal("application/json");
+    expect(users.body.users).to.be.an("array");
+    expect(users.body.users[0]).to.be.an("object");
+    expect(users.body.users[0].email).to.equal("testuser@example.com");
+  });
+
+  it("should not return the password", async function () {
+    const users = await request(app_.app).get("/api/v0/users");
+    expect(users.status).to.equal(200);
+    expect(users.type).to.equal("application/json");
+    expect(users.body.users).to.be.an("array");
+    expect(users.body.users[0]).to.be.an("object");
+    expect(users.body.users[0]).to.not.have.property("password");
+  });
+
+  it("should not return the email token", async function () {
+    const all_users = await request(app_.app).get("/api/v0/users");
+    expect(all_users.status).to.equal(200);
+    expect(all_users.type).to.equal("application/json");
+    expect(all_users.body.users).to.be.an("array");
+    expect(all_users.body.users[0]).to.be.an("object");
+    expect(all_users.body.users[0]).to.not.have.property(
+      "emailVerification"
+    );
+  });
+});
+
+describe("get logged in user", async function () {
+  this.timeout(2000);
+  let app_: App;
+  let testUser: mongoose.HydratedDocument<IUser>;
+
+  before(async function () {
+    await beforeEachSuite();
+    app_ = new App();
+    testUser = await createTestUser();
+  });
+
+  it("login route should be ok on success", async function () {
+    const response = await request(app_.app).post("/api/v0/auth/login").send({
+      email: "testuser@example.com",
+      password: "test",
+    });
+
+    expect(response.status).to.equal(200);
+  });
+
+  it("login route success should return JWT in header", async function () {
+    const response = await request(app_.app).post("/api/v0/auth/login").send({
+      email: "testuser@example.com",
+      password: "test",
+    });
+
+    expect(response.status).to.equal(200);
+    expect(response.headers["authorization"]).to.be.a("string");
+    expect(response.headers["authorization"]).to.include("JWT"); // JWT is the token type
+  });
+
+  it("login route should 401 on failure", async function () {
+    const response = await request(app_.app).post("/api/v0/auth/login").send({
+      email: "testuser@example.com",
+      password: "WRONGPASSWORD",
+    });
+
+    expect(response.status).to.equal(401); // unauthorized
+  });
+
+  it("login route failure should NOT return JWT in header", async function () {
+    const response = await request(app_.app).post("/api/v0/auth/login").send({
+      email: "testuser@example.com",
+      password: "WRONGPASSWORD",
+    });
+
+    expect(response.headers).to.not.have.property("authorization"); // no JWT header
+  });
+
+  it("login route should failure on wrong credentials", async function () {
+    const response = await request(app_.app).post("/api/v0/auth/login").send({
+      email: "testuser@example.com",
+      password: "WRONGPASSWORD",
+    });
+
+    expect(response.status).to.not.be.equal(200); // failure
+  });
+
+  it("should return a 200 for a logged-in user", async function () {
+    const JWT = await loginTestUser(request(app_.app));
+
+    const user = await request(app_.app)
+      .get("/api/v0/users/me")
+      .set("authorization", JWT);
+
+    expect(user.status).to.equal(200);
+    expect(user.type).to.equal("application/json");
+    expect(user.body.user).to.be.an("object");
+    expect(user.body.user).to.have.property("email", "testuser@example.com");
+  });
+
+  it("should not return the password field", async function () {
+    const JWT = await loginTestUser(request(app_.app));
+
+    const users = await request(app_.app)
+      .get("/api/v0/users/me")
+      .set("authorization", JWT);
+
+    expect(users.status).to.equal(200);
+    expect(users.type).to.equal("application/json");
+    expect(users.body.user).to.be.an("object");
+    expect(users.body.user).to.not.have.property("password");
+  });
+
+  it("should not return 200 for a user that wasn't logged-in", async function () {
+    const users = await request(app_.app).get("/api/v0/users/me");
+
+    expect(users.status).to.equal(401); // unauthorized
+  });
+
+  it("should not return 200 for a user that didn't pass JWT", async function () {
+    const JWT = await loginTestUser(request(app_.app));
+
+    // don't send the JWT
+    const users = await request(app_.app)
+      .get("/api/v0/users/me")
+    //.set("authorization", `JWT ${JWT}`);
+
+    expect(users.status).to.equal(401); // unauthorized
+  });
+});
+
+describe("create user", function () {
+  this.timeout(2000);
+  let app_: App;
+
+  beforeEach(async function () {
+    await beforeEachSuite();
+    app_ = new App();
+  });
+
+  it("should return a 201 and the created user", async function () {
+    const user = await request(app_.app).post("/api/v0/auth").send({
+      email: "testuser@example.com",
+      password: "test",
+    });
+
+    expect(user.status).to.equal(201);
+    expect(user.type).to.equal("application/json");
+    expect(user.body.user).to.be.an("object");
+    expect(user.body.user).to.have.property("email", "testuser@example.com");
+    expect(user.body.user).to.not.have.property("password");
+
+    // should have meesage about email verification
+    expect(user.body.message).to.be.a("string");
+    expect(user.body.message).to.include("verify").and.include("email");
+  });
+
+  it("should return a 409 for a user with an existing email", async function () {
+    const user = await request(app_.app).post("/api/v0/auth").send({
+      email: "testuser@example.com", // same email as above
+      password: "test",
+    });
+
+    expect(user.status).to.equal(201);
+
+    const duplicateEmailUser = await request(app_.app)
+      .post("/api/v0/auth")
+      .send({
+        email: "testuser@example.com", // same email as above
+        password: "test",
+      });
+
+    expect(duplicateEmailUser.status).to.equal(409); // user already exists
+    expect(duplicateEmailUser.type).to.equal("application/json");
+    expect(duplicateEmailUser.body.message).to.be.a("string");
+    expect(duplicateEmailUser.body.message)
+      .to.include("email")
+      .and.include("already");
+  });
+
+  it("should return a 400 if email is missing", async function () {
+    const response = await request(app_.app).post("/api/v0/auth").send({
+      password: "test",
+    });
+
+    expect(response.status).to.equal(400);
+    expect(response.type).to.equal("application/json");
+    expect(response.body).to.have.property("message");
+    expect(response.body.message).to.include("email");
+  });
+
+  it("should return a 400 if password is missing", async function () {
+    const response = await request(app_.app).post("/api/v0/auth").send({
+      email: "testuser@example.com",
+    });
+
+    expect(response.status).to.equal(400);
+    expect(response.type).to.equal("application/json");
+    expect(response.body).to.have.property("message");
+    expect(response.body.message).to.include("password");
+  });
+
+  it("should not login before email is verified", async function () {
+    const user = await request(app_.app).post("/api/v0/auth").send({
+      email: "testuser@example.com", 
+      password: "test",
+    });
+
+    expect(user.status).to.equal(201);
+
+    const login = await request(app_.app).post("/api/v0/auth/login").send({
+      email: "testuser@example.com",
+      password: "test",
+    });
+
+    expect(login.status).to.equal(401); // unauthorized
+  });
+
+  it("should be able to login after email is verified", async function () {
+    const user = await request(app_.app).post("/api/v0/auth").send({
+      email: "testuser@example.com",
+      password: "test",
+    });
+
+    expect(user.status).to.equal(201);
+
+    // verify email with token
+    const verify = await request(app_.app).get(
+      "/api/v0/auth/verify?email=testuser@example.com&token=faketokendoesntmatter"
+    ); // all tokens are valid for testing
+    expect(verify.status).to.equal(204); // success
+
+    const login = await request(app_.app).post("/api/v0/auth/login").send({
+      email: "testuser@example.com",
+      password: "test",
+    });
+
+    expect(login.status).to.equal(200); // success
+    // expect JWT in header
+    expect(login.headers["authorization"]).to.be.a("string");
+    expect(login.headers["authorization"]).to.include("JWT"); // JWT is the token type
+  });
+});
+//#endregion
+
+//#region Item Inialization
 
 describe('get default items', function () {
   this.timeout(2000);
