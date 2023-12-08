@@ -428,7 +428,7 @@ describe('get default items', function () {
 
   it("should return 201 if no existing items", async function () {
     const response = await request(app_.app)
-      .get("/api/v0/items/");
+      .get("/api/v0/items/?itemType=item");
 
     expect(response.status).to.equal(201);
     expect(response.type).to.equal("application/json");
@@ -443,7 +443,7 @@ describe('get default items', function () {
 
   it("should return a 201 and list of existing items", async function () {
     const response = await request(app_.app)
-      .get("/api/v0/items/");
+      .get("/api/v0/items/?itemType=item");
 
     expect(response.status).to.equal(201);
     expect(response.type).to.equal("application/json");
@@ -455,11 +455,11 @@ describe('get default items', function () {
 
   it("should return 201 if no existing tasks", async function () {
     const response = await request(app_.app)
-      .get("/api/v0/tasks/");
+      .get("/api/v0/items/?itemType=task");
 
     expect(response.status).to.equal(201);
     expect(response.type).to.equal("application/json");
-    expect(response.body.tasks).to.be.empty;
+    expect(response.body.items).to.be.empty;
   });
   
   it('should return an empty task', async function () {
@@ -470,23 +470,23 @@ describe('get default items', function () {
 
   it("should return a 201 and list of existing tasks", async function () {
     const response = await request(app_.app)
-      .get("/api/v0/tasks/");
+      .get("/api/v0/items/?itemType=task");
     
     expect(response.status).to.equal(201);
     expect(response.type).to.equal("application/json");
-    expect(response.body.tasks).to.be.an("array"); 
-    expect(response.body.tasks[0]).to.be.an("object");
+    expect(response.body.items).to.be.an("array"); 
+    expect(response.body.items[0]).to.be.an("object");
   });
 
-  //events 
+  // //events 
 
   it("should return 201 if no existing events", async function () {
     const response = await request(app_.app)
-      .get("/api/v0/events/");
+      .get("/api/v0/items/?itemType=event");
 
     expect(response.status).to.equal(201);
     expect(response.type).to.equal("application/json");
-    expect(response.body.events).to.be.empty;
+    expect(response.body.items).to.be.empty;
   });
 
   it('should return an empty event', async function () {
@@ -497,23 +497,23 @@ describe('get default items', function () {
 
   it("should return a 201 and list of existing events", async function () {
     const response = await request(app_.app)
-      .get("/api/v0/events/");
+      .get("/api/v0/items/?itemType=event");
     
     expect(response.status).to.equal(201);
     expect(response.type).to.equal("application/json");
-    expect(response.body.events).to.be.an("array"); 
-    expect(response.body.events[0]).to.be.an("object");
+    expect(response.body.items).to.be.an("array"); 
+    expect(response.body.items[0]).to.be.an("object");
   });
 
-  //pages
+  // //pages
 
-  it("should return 201 if no existing events", async function () {
+  it("should return 201 if no existing pages", async function () {
     const response = await request(app_.app)
-      .get("/api/v0/pages/");
+      .get("/api/v0/items/?itemType=page");
 
     expect(response.status).to.equal(201);
     expect(response.type).to.equal("application/json");
-    expect(response.body.pages).to.be.empty;
+    expect(response.body.items).to.be.empty;
   });
 
   it('should return an empty page', async function () {
@@ -524,23 +524,23 @@ describe('get default items', function () {
 
   it("should return a 201 and list of existing pages", async function () {
     const response = await request(app_.app)
-      .get("/api/v0/pages/");
+      .get("/api/v0/items/?itemType=page");
     
     expect(response.status).to.equal(201);
     expect(response.type).to.equal("application/json");
-    expect(response.body.pages).to.be.an("array"); 
-    expect(response.body.pages[0]).to.be.an("object");
+    expect(response.body.items).to.be.an("array"); 
+    expect(response.body.items[0]).to.be.an("object");
   });
 
-  //recipes
+  // //recipes
 
   it("should return 201 if no existing recipes", async function () {
     const response = await request(app_.app)
-      .get("/api/v0/recipes/");
+      .get("/api/v0/items/?itemType=recipe");
 
     expect(response.status).to.equal(201);
     expect(response.type).to.equal("application/json");
-    expect(response.body.recipes).to.be.empty;
+    expect(response.body.items).to.be.empty;
   });
 
   it('should return an empty page', async function () {
@@ -551,12 +551,12 @@ describe('get default items', function () {
 
   it("should return a 201 and list of existing recipes", async function () {
     const response = await request(app_.app)
-      .get("/api/v0/recipes/");
+      .get("/api/v0/items/?itemType=recipe");
     
     expect(response.status).to.equal(201);
     expect(response.type).to.equal("application/json");
-    expect(response.body.recipes).to.be.an("array"); 
-    expect(response.body.recipes[0]).to.be.an("object");
+    expect(response.body.items).to.be.an("array"); 
+    expect(response.body.items[0]).to.be.an("object");
   });
 
 });
@@ -578,12 +578,10 @@ describe('add new default item', async function () {
   //POSITIVE cases
 
   it("should return a 201 and the new item object", async function () {
-    //console.log("creating new!");
     const response = await request(app_.app)
-      .post("/api/v0/items/")
+      .post("/api/v0/items/?itemType=item")
       .send({
         title: "test empty",
-
       });
     
       expect(response.status).to.equal(201);
@@ -595,7 +593,7 @@ describe('add new default item', async function () {
   it("should return a 200 and the item by ID", async function () {
     testItem = await createItem();
     const response = await request(app_.app)
-      .get(`/api/v0/items/${testItem._id}`)
+      .get(`/api/v0/items/${testItem._id}?itemType=item`)
       .send();
     
       expect(response.status).to.equal(200);
@@ -609,7 +607,7 @@ describe('add new default item', async function () {
   it("should return a 400 if title is missing", async function () {
     //console.log("creating new!");
     const response = await request(app_.app)
-      .post("/api/v0/items/")
+      .post("/api/v0/items/?itemType=item")
       .send({});
     
       expect(response.status).to.equal(400);
@@ -631,10 +629,10 @@ describe("delete existing item", async function () {
 
   it("should return a 200 and the item object", async function () {
     await request(app_.app)
-      .delete(`/api/v0/items/${testItem._id}`)
+      .delete(`/api/v0/items/${testItem._id}?itemType=item`)
       .send();
       
-    const items = await request(app_.app).get("/api/v0/items/").send();
+    const items = await request(app_.app).get("/api/v0/items/?itemType=item").send();
 
     expect(items.status).to.equal(201);
     expect(items.type).to.equal("application/json");
@@ -648,7 +646,7 @@ describe("delete existing item", async function () {
 
   it("should not be returned if deleted", async function () {
     const response = await request(app_.app)
-      .delete(`/api/v0/items/${testItem._id}`)
+      .delete(`/api/v0/items/${testItem._id}?itemType=item`)
       .send();
 
     expect(response.status).to.equal(500);
@@ -671,7 +669,7 @@ describe('edit existing item', async function () {
 
   it("should be able to edit modifiable fields", async function () {
     const response = await request.agent(app_.app)
-      .patch(`/api/v0/items/${testItem._id}`)
+      .patch(`/api/v0/items/${testItem._id}?itemType=item`)
       .send({
           description: "test item",
           tags: [{
@@ -682,7 +680,7 @@ describe('edit existing item', async function () {
     expect(response.status).to.equal(200);
 
     const updatedItem = await request(app_.app).get(
-      `/api/v0/items/${testItem._id}`
+      `/api/v0/items/${testItem._id}?itemType=item`
     );
     expect(updatedItem.status).to.equal(200);
     expect(updatedItem.type).to.equal("application/json");
@@ -720,7 +718,7 @@ describe('add new task item', async function () {
 
   it("should return a 201 and the new task object", async function () {
     const response = await request(app_.app)
-      .post("/api/v0/tasks/")
+      .post("/api/v0/items/?itemType=task")
       .send({
         title: "test empty task",
 
@@ -728,15 +726,15 @@ describe('add new task item', async function () {
 
     expect(response.status).to.equal(201);
     expect(response.type).to.equal("application/json");
-    expect(response.body).to.have.property("task");
-    expect(response.body.task).to.have.property("title", "test empty task");
+    expect(response.body).to.have.property("item");
+    expect(response.body.item).to.have.property("title", "test empty task");
   });
 
   // NEGATIVE cases 
   
   it("should return a 400 if title is missing", async function () {
     const response = await request(app_.app)
-      .post("/api/v0/tasks/")
+      .post("/api/v0/items/?itemType=task")
       .send({});
   
     expect(response.status).to.equal(400);
@@ -758,24 +756,24 @@ describe("delete existing task", async function () {
 
   it("should return a 200 and the task object", async function () {
     await request(app_.app)
-      .delete(`/api/v0/tasks/${testTask._id}`)
+      .delete(`/api/v0/items/${testTask._id}?itemType=task`)
       .send();
       
-    const tasks = await request(app_.app).get("/api/v0/tasks/").send();
+    const tasks = await request(app_.app).get("/api/v0/items/?itemType=task").send();
 
     expect(tasks.status).to.equal(201);
     expect(tasks.type).to.equal("application/json");
-    expect(tasks.body.tasks).to.be.an("array");
+    expect(tasks.body.items).to.be.an("array");
     expect(
-      (tasks.body.tasks as Array<HydratedDocument<ITask>>).some(
-        (task) => task._id === testTask._id
+      (tasks.body.items as Array<HydratedDocument<ITask>>).some(
+        (item) => item._id === testTask._id
       )
     ).to.be.false;
   });
 
   it("should not be returned if deleted", async function () {
     const response = await request(app_.app)
-      .delete(`/api/v0/tasks/${testTask._id}`)
+      .delete(`/api/v0/items/${testTask._id}?itemType=task`)
       .send();
 
     expect(response.status).to.equal(500);
@@ -785,49 +783,39 @@ describe("delete existing task", async function () {
 
 });
 
-
 describe('edit existing task', async function () {
   this.timeout(1000);
   let app_: App
-  let testItem: HydratedDocument<IItem>;
+  let testTask: HydratedDocument<ITask>;
 
   before(async function () {
-    await beforeEachSuite();
-    app_ = new App();
-    testItem = await createTask();
+      await beforeEachSuite();
+      app_ = new App();
+      testTask = await createTask();
   });
 
   it("should be able to edit modifiable fields", async function () {
-    const response = await request.agent(app_.app)
-      .patch(`/api/v0/tasks/${testItem._id}`)
-      .send({
-          description: "test task",
-          tags: [{
-            "name" : "Default"
-          }]
-      });
+      const response = await request.agent(app_.app)
+          .patch(`/api/v0/items/${testTask._id}?itemType=task`)
+          .send({
+              description: "test task",
+              tags: [{
+                  name: "Default"
+              }]
+          });
 
-    expect(response.status).to.equal(200);
+      expect(response.status).to.equal(200);
 
-    const updatedTask = await request(app_.app).get(
-      `/api/v0/tasks/${testItem._id}`
-    );
-    expect(updatedTask.status).to.equal(200);
-    expect(updatedTask.type).to.equal("application/json");
-    expect(updatedTask.body.task).to.have.property(
-      "description",
-      "test task"
-    );
+      const updatedEvent = await request(app_.app).get(
+          `/api/v0/items/${testTask._id}?itemType=task`
+      );
+      expect(updatedEvent.status).to.equal(200);
+      expect(updatedEvent.type).to.equal("application/json");
+      expect(updatedEvent.body.item).to.have.property(
+          "description",
+          "test task"
+      );
   });
-  
-  // it("should not be able to edit nonmodifiable fields", async function () {
-    //Add Test
-  // });
-
-  // it("should only be able to edit modifiable fields", async function () {
-    //Add test
-  // });
-  
 });
 
 //#endregion
@@ -848,34 +836,34 @@ describe('add new default event', async function () {
 
   it("should return a 201 and the new event object", async function () {
       const response = await request(app_.app)
-          .post("/api/v0/events/")
+          .post("/api/v0/items/?itemType=event")
           .send({
               title: "test empty",
           });
 
       expect(response.status).to.equal(201);
       expect(response.type).to.equal("application/json");
-      expect(response.body).to.have.property("event");
-      expect(response.body.event).to.have.property("title", "test empty");
+      expect(response.body).to.have.property("item");
+      expect(response.body.item).to.have.property("title", "test empty");
   });
 
   it("should return a 200 and the event by ID", async function () {
       testEvent = await createEvent();
       const response = await request(app_.app)
-          .get(`/api/v0/events/${testEvent._id}`)
+          .get(`/api/v0/items/${testEvent._id}?itemType=event`)
           .send();
 
       expect(response.status).to.equal(200);
       expect(response.type).to.equal("application/json");
-      expect(response.body).to.have.property("event");
-      expect(response.body.event).to.have.property("title", "Test Empty Event");
+      expect(response.body).to.have.property("item");
+      expect(response.body.item).to.have.property("title", "Test Empty Event");
   });
 
   // NEGATIVE cases
 
   it("should return a 400 if title is missing", async function () {
       const response = await request(app_.app)
-          .post("/api/v0/events/")
+          .post("/api/v0/items/?itemType=event")
           .send({});
 
       expect(response.status).to.equal(400);
@@ -896,24 +884,24 @@ describe("delete existing event", async function () {
 
   it("should return a 200 and the event object", async function () {
       await request(app_.app)
-          .delete(`/api/v0/events/${testEvent._id}`)
+          .delete(`/api/v0/items/${testEvent._id}?itemType=event`)
           .send();
 
-      const events = await request(app_.app).get("/api/v0/events/").send();
+      const events = await request(app_.app).get("/api/v0/items/?itemType=event").send();
 
       expect(events.status).to.equal(201);
       expect(events.type).to.equal("application/json");
-      expect(events.body.events).to.be.an("array");
+      expect(events.body.items).to.be.an("array");
       expect(
-          (events.body.events as Array<HydratedDocument<IEvent>>).some(
-              (event) => event._id === testEvent._id
+          (events.body.items as Array<HydratedDocument<IEvent>>).some(
+              (item) => item._id === testEvent._id
           )
       ).to.be.false;
   });
 
   it("should not be returned if deleted", async function () {
       const response = await request(app_.app)
-          .delete(`/api/v0/events/${testEvent._id}`)
+          .delete(`/api/v0/items/${testEvent._id}?itemType=event"`)
           .send();
 
       expect(response.status).to.equal(500);
@@ -934,7 +922,7 @@ describe('edit existing event', async function () {
 
   it("should be able to edit modifiable fields", async function () {
       const response = await request.agent(app_.app)
-          .patch(`/api/v0/events/${testEvent._id}`)
+          .patch(`/api/v0/items/${testEvent._id}?itemType=event`)
           .send({
               description: "test event",
               tags: [{
@@ -945,11 +933,11 @@ describe('edit existing event', async function () {
       expect(response.status).to.equal(200);
 
       const updatedEvent = await request(app_.app).get(
-          `/api/v0/events/${testEvent._id}`
+          `/api/v0/items/${testEvent._id}?itemType=event`
       );
       expect(updatedEvent.status).to.equal(200);
       expect(updatedEvent.type).to.equal("application/json");
-      expect(updatedEvent.body.event).to.have.property(
+      expect(updatedEvent.body.item).to.have.property(
           "description",
           "test event"
       );
@@ -974,7 +962,7 @@ describe('add new page item', async function () {
 
   it("should return a 201 and the new page object", async function () {
     const response = await request(app_.app)
-      .post("/api/v0/pages/")
+      .post("/api/v0/items/?itemType=page")
       .send({
         title: "test empty page",
 
@@ -982,15 +970,15 @@ describe('add new page item', async function () {
 
     expect(response.status).to.equal(201);
     expect(response.type).to.equal("application/json");
-    expect(response.body).to.have.property("page");
-    expect(response.body.page).to.have.property("title", "test empty page");
+    expect(response.body).to.have.property("item");
+    expect(response.body.item).to.have.property("title", "test empty page");
   });
 
   // NEGATIVE cases 
   
   it("should return a 400 if title is missing", async function () {
     const response = await request(app_.app)
-      .post("/api/v0/pages/")
+      .post("/api/v0/items/?itemType=page")
       .send({});
   
     expect(response.status).to.equal(400);
@@ -1012,24 +1000,24 @@ describe("delete existing page", async function () {
 
   it("should return a 200 and the page object", async function () {
       await request(app_.app)
-          .delete(`/api/v0/pages/${testPage._id}`)
+          .delete(`/api/v0/items/${testPage._id}?itemType=page`)
           .send();
           
-      const pages = await request(app_.app).get("/api/v0/pages/").send();
+      const pages = await request(app_.app).get("/api/v0/items/?itemType=page").send();
 
       expect(pages.status).to.equal(201);
       expect(pages.type).to.equal("application/json");
-      expect(pages.body.pages).to.be.an("array");
+      expect(pages.body.items).to.be.an("array");
       expect(
-          (pages.body.pages as Array<HydratedDocument<IPage>>).some(
-              (page) => page._id === testPage._id
+          (pages.body.items as Array<HydratedDocument<IPage>>).some(
+              (item) => item._id === testPage._id
           )
       ).to.be.false;
   });
 
   it("should not be returned if deleted", async function () {
       const response = await request(app_.app)
-          .delete(`/api/v0/pages/${testPage._id}`)
+          .delete(`/api/v0/items/${testPage._id}?itemType=page`)
           .send();
 
       expect(response.status).to.equal(500);
@@ -1050,7 +1038,7 @@ describe('edit existing page', async function () {
 
   it("should be able to edit modifiable fields", async function () {
       const response = await request.agent(app_.app)
-          .patch(`/api/v0/pages/${testPage._id}`)
+          .patch(`/api/v0/items/${testPage._id}?itemType=page`)
           .send({
               description: "test page",
               tags: [{
@@ -1061,11 +1049,11 @@ describe('edit existing page', async function () {
       expect(response.status).to.equal(200);
 
       const updatedPage = await request(app_.app).get(
-          `/api/v0/pages/${testPage._id}`
+          `/api/v0/items/${testPage._id}?itemType=page`
       );
       expect(updatedPage.status).to.equal(200);
       expect(updatedPage.type).to.equal("application/json");
-      expect(updatedPage.body.page).to.have.property(
+      expect(updatedPage.body.item).to.have.property(
           "description",
           "test page"
       );
@@ -1090,34 +1078,34 @@ describe('add new default recipe', async function () {
 
   it("should return a 201 and the new recipe object", async function () {
       const response = await request(app_.app)
-          .post("/api/v0/recipes/")
+          .post("/api/v0/items/?itemType=recipe")
           .send({
               title: "test empty",
           });
 
       expect(response.status).to.equal(201);
       expect(response.type).to.equal("application/json");
-      expect(response.body).to.have.property("recipe");
-      expect(response.body.recipe).to.have.property("title", "test empty");
+      expect(response.body).to.have.property("item");
+      expect(response.body.item).to.have.property("title", "test empty");
   });
 
   it("should return a 200 and the recipe by ID", async function () {
       testRecipe = await createRecipe();
       const response = await request(app_.app)
-          .get(`/api/v0/recipes/${testRecipe._id}`)
+          .get(`/api/v0/items/${testRecipe._id}?itemType=recipe`)
           .send();
 
       expect(response.status).to.equal(200);
       expect(response.type).to.equal("application/json");
-      expect(response.body).to.have.property("recipe");
-      expect(response.body.recipe).to.have.property("title", "Test Empty Recipe");
+      expect(response.body).to.have.property("item");
+      expect(response.body.item).to.have.property("title", "Test Empty Recipe");
   });
 
   // NEGATIVE cases
 
   it("should return a 400 if title is missing", async function () {
       const response = await request(app_.app)
-          .post("/api/v0/recipes/")
+          .post("/api/v0/items/?itemType=recipe")
           .send({});
 
       expect(response.status).to.equal(400);
@@ -1138,24 +1126,24 @@ describe("delete existing recipe", async function () {
 
   it("should return a 200 and the recipe object", async function () {
       await request(app_.app)
-          .delete(`/api/v0/recipes/${testRecipe._id}`)
+          .delete(`/api/v0/items/${testRecipe._id}?itemType=recipe`)
           .send();
 
-      const recipes = await request(app_.app).get("/api/v0/recipes/").send();
+      const recipes = await request(app_.app).get("/api/v0/items/?itemType=recipe").send();
 
       expect(recipes.status).to.equal(201);
       expect(recipes.type).to.equal("application/json");
-      expect(recipes.body.recipes).to.be.an("array");
+      expect(recipes.body.items).to.be.an("array");
       expect(
-          (recipes.body.recipes as Array<HydratedDocument<IRecipe>>).some(
-              (recipe) => recipe._id === testRecipe._id
+          (recipes.body.items as Array<HydratedDocument<IRecipe>>).some(
+              (item) => item._id === testRecipe._id
           )
       ).to.be.false;
   });
 
   it("should not be returned if deleted", async function () {
       const response = await request(app_.app)
-          .delete(`/api/v0/recipes/${testRecipe._id}`)
+          .delete(`/api/v0/items/${testRecipe._id}?itemType=recipe`)
           .send();
 
       expect(response.status).to.equal(500);
@@ -1176,7 +1164,7 @@ describe('edit existing recipe', async function () {
 
   it("should be able to edit modifiable fields", async function () {
       const response = await request.agent(app_.app)
-          .patch(`/api/v0/recipes/${testRecipe._id}`)
+          .patch(`/api/v0/items/${testRecipe._id}?itemType=recipe`)
           .send({
               description: "test recipe",
               tags: [{
@@ -1187,11 +1175,11 @@ describe('edit existing recipe', async function () {
       expect(response.status).to.equal(200);
 
       const updatedRecipe = await request(app_.app).get(
-          `/api/v0/recipes/${testRecipe._id}`
+          `/api/v0/items/${testRecipe._id}?itemType=recipe`
       );
       expect(updatedRecipe.status).to.equal(200);
       expect(updatedRecipe.type).to.equal("application/json");
-      expect(updatedRecipe.body.recipe).to.have.property(
+      expect(updatedRecipe.body.item).to.have.property(
           "description",
           "test recipe"
       );
