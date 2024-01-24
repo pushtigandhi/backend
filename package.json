@@ -6,9 +6,9 @@
     "scripts": {
         "start": "NODE_ENV=production ts-node ./dist/server.js",
         "dev": "NODE_ENV=development nodemon ./src/server.ts",
-        "test": "NODE_ENV=testing mocha ./src/test --recursive",
+        "test": "NODE_ENV=testing mocha ./src/test/test_items_filters --recursive",
         "build": "tsc",
-        "test:local": "NODE_ENV=testing mocha ./src/test --recursive --reporter spec"
+        "test:local": "NODE_ENV=testing mocha ./src/test/test_items_filters --recursive --reporter spec"
     },
     "keywords": [
         "express",

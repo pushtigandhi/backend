@@ -2,18 +2,49 @@ import { Request, Response } from "express";
 import { Types, isValidObjectId } from "mongoose";
 import _ from 'lodash';
 
-import ItemService from "../services/items.service";
+import ItemService, { IFilter } from "../services/items.service";
 
 export default class ItemsController {
     public itemService = new ItemService();
 
     public getItems = async (req: Request, res: Response) => {
         const { itemType } = req.query;
+        
         try {
-            const items = await this.itemService.getItems(itemType.toString());
+            const validFields = ["category", "section", "startlt", "startgt", "endlt", "endgt", "duration", "priority", "tags", "icon", "search"];
+            
+            const filter = req.query as any;
+
+            try {
+                if (!!filter.startlt) {
+                    filter.startlt = new Date(parseInt(filter.startlt));
+                }
+
+                if (!!filter.startgt) {
+                    filter.startgt = new Date(parseInt(filter.startgt));
+                }
+            } catch (e) {
+                return res.status(400).send({message: "Invalid date format"});
+            }
+            try {
+                if (!!filter.endlt) {
+                    filter.endlt = new Date(parseInt(filter.endlt));
+                }
+
+                if (!!filter.endgt) {
+                    filter.endgt = new Date(parseInt(filter.endgt));
+                }
+            } catch (e) {
+                return res.status(400).send({message: "Invalid date format"});
+            }
+
+            const validFilter = _.pick(filter, validFields) as IFilter;
+
+            
+            const items = await this.itemService.getItems(itemType.toString(), validFilter);
             res.status(201).json({items});
         } catch (error) {
-            console.log(error);
+            console.error(error);
             res.status(500).json({
                 message: "server error"
             });
@@ -41,14 +72,21 @@ export default class ItemsController {
         const { itemType } = req.query;
 
         let newItem = req.body;
+        
+        // const author = req.user; // get user
+        // if (!author) {
+        //     return res.status(401).json({ error: 'Unauthorized' });
+        // }
+        
         try {
-            newItem = _.pick(newItem, ["title"]);
+            newItem = _.pick(newItem, ["title", "description", "category", "section", "startDate", "endDate", "tags", "priority", "notes", "repeat", "icon"]);
 
             const missingFields = _.difference(["title"], Object.keys(newItem));
             if (missingFields.length > 0) {
                 return res.status(400).json({ error: 'Missing required fields', missingFields});
             } 
 
+            //const item = await this.itemService.addItem(new Types.ObjectId(author._id), itemType.toString(), newItem);
             const item = await this.itemService.addItem(itemType.toString(), newItem);
             res.status(201).json({ item });
         } catch (error) {
@@ -91,11 +129,13 @@ export default class ItemsController {
             case "task":
                 return this.editTask(req, res, itemType.toString());
             case "event":
-                return this.editItem(req, res, itemType.toString());
+                return this.editEvent(req, res, itemType.toString());
             case "page":
-                return this.editItem(req, res,itemType.toString());
+                return this.editPage(req, res,itemType.toString());
             case "recipe":
-                return this.editItem(req, res, itemType.toString());
+                return this.editRecipe(req, res, itemType.toString());
+            case "tag":
+                return this.editTag(req, res, itemType.toString());
             default:
                 return this.editItem(req, res, itemType.toString());
         }
@@ -112,8 +152,19 @@ export default class ItemsController {
 
             const update = _.pick(req.body, [
                 "title",
+                "category",
+                "section",
+                "icon",
+                "favicon",
+                "tags",
                 "description",
-                "tags"
+                "startDate",
+                "endDate",
+                "duration",
+                "repeat",
+                "priority",
+                "notes",
+                "poster"
             ]);
 
             if (Object.keys(update).length === 0) {
@@ -316,6 +367,49 @@ export default class ItemsController {
                 return res.status(200).json({
                     message: "Successfully updated",
                     recipe: result,
+                });
+            }
+        } catch (error: any) {
+            console.error(error);
+            res.status(500).json({
+                message: "Server error",
+            });
+        }
+    };
+
+    public editTag = async (req: Request, res: Response, itemType: string) => {
+        const { id: itemId } = req.params;
+
+        try {
+            if (!isValidObjectId(itemId)) {
+                return res.status(400).json({ error: 'Invalid item ID' });
+            }
+            const itemId_ = new Types.ObjectId(itemId);
+
+            const update = _.pick(req.body, [
+                "color"
+            ]);
+
+            if (Object.keys(update).length === 0) {
+                return res.status(400).json({
+                    error: "No fields were modifiable",
+                });
+            }
+
+            const result = await this.itemService.editItem(
+                itemType,
+                itemId_,
+                update
+            );
+
+            if (!result) {
+                return res.status(500).json({
+                    error: "server error",
+                });
+            } else {
+                return res.status(200).json({
+                    message: "Successfully updated",
+                    item: result,
                 });
             }
         } catch (error: any) {

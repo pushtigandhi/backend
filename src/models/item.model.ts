@@ -1,12 +1,12 @@
-import mongoose, { Schema, model } from "mongoose";
+import mongoose, { Types, Schema, model } from "mongoose";
 
 export interface ITag {
-    name: string;
+    title: string;
     color: string;
 }
 
 const tagSchema = new Schema<ITag>({
-    name: {
+    title: {
         type: String,
         required: true
     },
@@ -25,7 +25,7 @@ export interface IItem {
         data: Buffer;
         contentType: string;
     };
-    tags?: [ITag];
+    tags?: [string];
     description?: string;
     startDate?: Date;
     endDate?: Date;
@@ -35,6 +35,7 @@ export interface IItem {
     notes?: [string];
     createdAt: Date;
     updatedAt?: Date;
+    poster: Types.ObjectId;
 }
 
 const itemSchema = new mongoose.Schema(
@@ -60,7 +61,7 @@ const itemSchema = new mongoose.Schema(
             contentType: String,
         },
         tags: {
-            type: [tagSchema],
+            type: [String],
         },
         description: {
             type: String,
@@ -83,7 +84,12 @@ const itemSchema = new mongoose.Schema(
         },
         notes: {
             type: [String],
-        }
+        },
+        poster: {
+            type: Types.ObjectId,
+            ref: 'Profile',
+            required: true
+        },
     },
     {
         timestamps: true,

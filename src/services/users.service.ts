@@ -1,5 +1,6 @@
 import User, { IUser } from "../models/users.model";
-import { HydratedDocument } from "mongoose";
+import Profile, { IProfile } from "../models/profile.model";
+import { HydratedDocument, Types } from "mongoose";
 
 export default class UserService {
   public users_model = User;
@@ -10,7 +11,7 @@ export default class UserService {
   }
 
   public async createTestUser(
-    email: string = "pushti@example.com"
+    email: string = "test@example.com"
   ): Promise<HydratedDocument<IUser>> {
     const user = new User({
       email: email,
@@ -25,6 +26,18 @@ export default class UserService {
     });
   
     return await user.save();
+  }
+  
+  public async createTestProfile(
+    user_id: Types.ObjectId
+  ): Promise<HydratedDocument<IProfile>> {
+    // create profile
+    return await Profile.create({
+      user: user_id,
+      avatar: null,
+      bio: "testbio",
+      displayName: "test",
+    });
   }
 
   public async clearUsers() {

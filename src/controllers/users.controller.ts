@@ -34,7 +34,7 @@ export default class UsersController {
     public createTestUser = async (req: Request, res: Response) => {
         try {
             
-            const user = await this.userService.createTestUser(); // req.user is set by passport in middleware
+            const user = await this.userService.createTestUser();
             if (!user) {
                 return res.status(404).json({error: 'User not created'});
             }
@@ -42,6 +42,27 @@ export default class UsersController {
                 user: {
                     _id: user._id,
                     email: user.email
+                }
+            });
+        } catch (error: any) {
+            console.error(error);
+            res.status(500).json({
+                message: "Server error",
+            });
+        }
+    }
+    
+    public createTestProfile = async (req: Request, res: Response) => {
+        try {
+            const email = req.body.id;
+            const user = await this.userService.createTestProfile(email); // req.user is set by passport in middleware
+            if (!user) {
+                return res.status(404).json({error: 'User not created'});
+            }
+            res.status(200).json({
+                user: {
+                    _id: user._id,
+                    displayName: user.displayName
                 }
             });
         } catch (error: any) {

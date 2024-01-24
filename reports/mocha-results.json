@@ -1,36 +1,53 @@
 {
   "stats": {
     "suites": 1,
-    "tests": 1,
-    "passes": 1,
+    "tests": 0,
+    "passes": 0,
     "pending": 0,
-    "failures": 0,
-    "start": "2023-11-15T06:13:28.799Z",
-    "end": "2023-11-15T06:13:29.570Z",
-    "duration": 771
+    "failures": 1,
+    "start": "2024-01-23T22:07:59.730Z",
+    "end": "2024-01-23T22:07:59.832Z",
+    "duration": 102
   },
-  "tests": [
+  "tests": [],
+  "pending": [],
+  "failures": [
     {
-      "title": "should return a 201 and the new item object",
-      "fullTitle": "add new item should return a 201 and the new item object",
-      "file": "/mnt/c/Users/pusht/Desktop/NewVC/backend/src/test/test.ts",
-      "duration": 511,
+      "title": "\"before each\" hook for \"should return a 200 and search with a keyword\"",
+      "fullTitle": "test item filters \"before each\" hook for \"should return a 200 and search with a keyword\"",
+      "file": "/mnt/c/Users/pusht/Desktop/NewVC/backend/src/test/test_items_filters.ts",
+      "duration": 89,
       "currentRetry": 0,
-      "speed": "slow",
-      "err": {}
+      "err": {
+        "stack": "ValidationError: User validation failed: emailVerification.token.value: Path `emailVerification.token.value` is required., emailVerification.token.expiresAt: Path `emailVerification.token.expiresAt` is required.\n    at model.Document.invalidate (node_modules/mongoose/lib/document.js:3174:32)\n    at /mnt/c/Users/pusht/Desktop/NewVC/backend/node_modules/mongoose/lib/document.js:2967:17\n    at /mnt/c/Users/pusht/Desktop/NewVC/backend/node_modules/mongoose/lib/schemaType.js:1367:9\n    at processTicksAndRejections (node:internal/process/task_queues:77:11)",
+        "message": "User validation failed: emailVerification.token.value: Path `emailVerification.token.value` is required., emailVerification.token.expiresAt: Path `emailVerification.token.expiresAt` is required.",
+        "errors": {
+          "emailVerification.token.value": {
+            "name": "ValidatorError",
+            "message": "Path `emailVerification.token.value` is required.",
+            "properties": {
+              "message": "Path `emailVerification.token.value` is required.",
+              "type": "required",
+              "path": "emailVerification.token.value"
+            },
+            "kind": "required",
+            "path": "emailVerification.token.value"
+          },
+          "emailVerification.token.expiresAt": {
+            "name": "ValidatorError",
+            "message": "Path `emailVerification.token.expiresAt` is required.",
+            "properties": {
+              "message": "Path `emailVerification.token.expiresAt` is required.",
+              "type": "required",
+              "path": "emailVerification.token.expiresAt"
+            },
+            "kind": "required",
+            "path": "emailVerification.token.expiresAt"
+          }
+        },
+        "_message": "User validation failed"
+      }
     }
   ],
-  "pending": [],
-  "failures": [],
-  "passes": [
-    {
-      "title": "should return a 201 and the new item object",
-      "fullTitle": "add new item should return a 201 and the new item object",
-      "file": "/mnt/c/Users/pusht/Desktop/NewVC/backend/src/test/test.ts",
-      "duration": 511,
-      "currentRetry": 0,
-      "speed": "slow",
-      "err": {}
-    }
-  ]
+  "passes": []
 }

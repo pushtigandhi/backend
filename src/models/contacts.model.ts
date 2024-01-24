@@ -39,6 +39,7 @@ const addressSchema = new mongoose.Schema({
 
 export interface IContact {
     name: string;
+    company: string;
     birthday: Date;
     phoneNumber: Number;
     notes: string;
@@ -50,8 +51,11 @@ export interface IContact {
 const contactSchema = new mongoose.Schema(
     {
         name: {
-        type: String,
-        required: true,
+            type: String,
+            required: true,
+        },
+        company: {
+            type: String,
         },
         birthday: {
             type: Date,
