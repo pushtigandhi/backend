@@ -32,7 +32,6 @@ export default class AuthService {
         const user: HydratedDocument<IUser> | null = await User.findOne({
             email: email,
         });
-        const users = await User.find({}, { _id: 1, email: 1 });
         if (!user) {
             return { success: false, message: "User not found" };
         } else {

@@ -16,12 +16,15 @@ export default class UsersController {
 
     public getMe = async (req: Request, res: Response) => {
         try {
-            const user = req.user; //await this.userService.getUserById(req.user); // req.user is set by passport in middleware
+            const user = await this.userService.getUserById(req.user!["_id"]); // req.user is set by passport in middleware
             if (!user) {
                 return res.status(404).json({error: 'User not found'});
             }
             res.status(200).json({
-                user: req.authInfo
+                user: {
+                    _id: user._id,
+                    email: user.email
+                }
             });
         } catch (error: any) {
             console.error(error);

@@ -10,6 +10,13 @@ export default class UserService {
     return users;
   }
 
+  public async getUserById(
+    id: string
+  ): Promise<HydratedDocument<IUser> | null> {
+    const user = await this.users_model.findById(id); // find user by id
+    return user as HydratedDocument<IUser> | null;
+  }
+
   public async createTestUser(
     email: string = "test@example.com"
   ): Promise<HydratedDocument<IUser>> {

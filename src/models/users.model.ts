@@ -4,7 +4,8 @@ import bcrypt from 'bcrypt';
 
 const HASH_ROUNDS = 10; // 10 hash rounds for bcrypt
 
-export interface IUser{
+export interface IUser {
+    //id: Schema.Types.ObjectId;
     email: string;
     password: string; // the hash of the password
     emailVerification: {
@@ -18,6 +19,10 @@ export interface IUser{
 }
 
 const userSchema = new Schema<IUser>({
+    // id: {
+    //     type: Schema.Types.ObjectId,
+    //     unique: true,
+    // },
     email: {
         type: String,
         required: true,

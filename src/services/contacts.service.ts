@@ -1,5 +1,5 @@
 import Contact, { IContact } from "../models/contacts.model"
-import mongoose, { HydratedDocument, ObjectId, Types } from "mongoose";
+import { HydratedDocument, Types } from "mongoose";
 
 export default class ContactService {
     public contact_model = Contact;

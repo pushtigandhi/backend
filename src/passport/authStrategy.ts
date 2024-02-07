@@ -24,9 +24,10 @@ const localStrategy = new JwtStrategy({
             if (!user.emailVerification.isVerified) {
                 return cb(null, false, { message: "Email is not yet verified." });
             }
-            var arg = { _id: user._id,
-                email: user.email, };
-            return cb(null, user, arg);
+            return cb(null, {
+                _id: user._id,
+                email: user.email,
+            });
         }
     } catch (e) {
         return cb(e);

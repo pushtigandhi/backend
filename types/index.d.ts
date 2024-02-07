@@ -1,7 +1,10 @@
 declare global {
-    namespace Express {
-
+  namespace Express {
+    interface User {
+      _id: string;
+      email: string;
     }
   }
-  
-  export {};
+}
+
+export {};

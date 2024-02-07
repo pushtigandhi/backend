@@ -1,21 +1,5 @@
 import mongoose, { Types, Schema, model } from "mongoose";
 
-export interface ITag {
-    title: string;
-    color: string;
-}
-
-const tagSchema = new Schema<ITag>({
-    title: {
-        type: String,
-        required: true
-    },
-    color: {
-        type: String,
-        default: "#FAFAFC"
-    }
-});
-
 export interface IItem {
     title: string;
     category: string;
@@ -25,7 +9,7 @@ export interface IItem {
         data: Buffer;
         contentType: string;
     };
-    tags?: [string];
+    tags: [string];
     description?: string;
     startDate?: Date;
     endDate?: Date;
@@ -35,7 +19,7 @@ export interface IItem {
     notes?: [string];
     createdAt: Date;
     updatedAt?: Date;
-    poster: Types.ObjectId;
+    owner: Types.ObjectId;
 }
 
 const itemSchema = new mongoose.Schema(
@@ -85,7 +69,7 @@ const itemSchema = new mongoose.Schema(
         notes: {
             type: [String],
         },
-        poster: {
+        owner: {
             type: Types.ObjectId,
             ref: 'Profile',
             required: true
@@ -115,7 +99,7 @@ export interface IEvent extends IItem {
     contacts: [Schema.Types.ObjectId],
     location: string,
     address: Schema.Types.ObjectId,
-    checklist: [string],
+    subtasks: [string],
 }
 
 const eventSchema = new Schema({
@@ -132,7 +116,7 @@ const eventSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: "Address",
     },
-    checklist: {
+    subtasks: {
         type: [String],
     }
 });
@@ -172,6 +156,5 @@ export const Task = model<ITask>('Task', taskSchema);
 export const Event = model<IEvent>('Event', eventSchema);
 export const Page = model<IPage>('Page', pageSchema);
 export const Recipe = model<IRecipe>('Recipe', recipeSchema);
-export const Tag = model<ITag>('Tag', tagSchema);
 
 //export default Item;

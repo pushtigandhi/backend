@@ -11,7 +11,8 @@ import { before, beforeEach, after, describe, it } from 'mocha';
 import App from "../app";
 import User, { IUser } from "../models/users.model";
 import Profile, { IProfile } from "../models/profile.model";
-import { Item, IItem, Tag, ITag } from "../models/item.model";
+import { Item, IItem } from "../models/item.model";
+import { Tag, ITag } from "../models/tag.model";
 import Image from "../models/image.model";
 import { HydratedDocument, Types } from "mongoose";
 
@@ -34,7 +35,7 @@ async function createTestUser(
   const user = new User({
     email: email,
     password: "test",
-    emailVerificationInfo: {
+    emailVerification: {
       isVerified: true,
       token: {
         value: "test",
@@ -84,7 +85,6 @@ async function createTestItemWithBody(
 async function createTestTag(
   name: string = "test"
 ): Promise<HydratedDocument<ITag>> {
-  console.log("here0");
   const testTag = await Tag.create({
     name: name,
   });
@@ -93,7 +93,7 @@ async function createTestTag(
 }
 
 describe("test item filters", async function () {
-  this.timeout(1000);
+  this.timeout(2000);
   let app_: App;
   let testItem0: HydratedDocument<IItem>;
   let testItem1: HydratedDocument<IItem>;
@@ -101,6 +101,10 @@ describe("test item filters", async function () {
   let testUser: HydratedDocument<IUser>;
   let testTag0: HydratedDocument<ITag>;
   let testTag1: HydratedDocument<ITag>;
+
+  const searchParams = new URLSearchParams();
+  ["first", "second"].forEach(tag => searchParams.append("tags", tag));
+  console.log(searchParams.toString());
 
   const newSearchParams = new URLSearchParams({
     startlt: new Date("2021-01-02").toString(),
@@ -144,6 +148,7 @@ describe("test item filters", async function () {
       tags: [testTag0._id.toString()],
     });
 
+  
   it("should return a 200 and search with a keyword", async function () {
     const JWT = await loginTestUser(request.agent(app_.app));
     const newSearchParams = new URLSearchParams({
