@@ -116,6 +116,7 @@ const eventSchema = new Schema({
     
     contacts: {
         type: [Schema.Types.ObjectId],
+        ref: "Contact",
     },
     location: {
         type: String,

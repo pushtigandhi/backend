@@ -58,7 +58,8 @@ export default class ProfileController {
         "bio",
         "displayName",
         "avatarImage",
-        "items"
+        "items",
+        "directory"
       ]);
 
       if (Object.keys(update).length === 0) {
