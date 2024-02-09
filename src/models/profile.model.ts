@@ -11,6 +11,7 @@ export interface IProfile {
     isVerified: boolean;
     email: string;
   }
+  items: [Schema.Types.ObjectId];
 }
 
 const profileSchema = new mongoose.Schema(
@@ -29,6 +30,10 @@ const profileSchema = new mongoose.Schema(
       isVerified: Boolean,
       email: String,
     },
+    items: [{
+      type: Schema.Types.ObjectId,
+      ref: 'Item',
+    }]
   },
   {
     timestamps: true,

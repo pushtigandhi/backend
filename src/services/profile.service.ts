@@ -38,7 +38,5 @@ export default class ProfileService {
       console.error(err);
       return null;
     }
-
-    return profile;
   }
 }

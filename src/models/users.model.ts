@@ -1,11 +1,9 @@
-
-import mongoose, { Document, Schema, model, CallbackError } from 'mongoose';
+import { Schema, model, CallbackError } from 'mongoose';
 import bcrypt from 'bcrypt';
 
 const HASH_ROUNDS = 10; // 10 hash rounds for bcrypt
 
 export interface IUser {
-    //id: Schema.Types.ObjectId;
     email: string;
     password: string; // the hash of the password
     emailVerification: {
@@ -19,10 +17,6 @@ export interface IUser {
 }
 
 const userSchema = new Schema<IUser>({
-    // id: {
-    //     type: Schema.Types.ObjectId,
-    //     unique: true,
-    // },
     email: {
         type: String,
         required: true,
@@ -76,4 +70,3 @@ userSchema.methods.validatePassword = async function (pass: string) {
 const User = model<IUser>('User', userSchema);
 
 export default User;
-

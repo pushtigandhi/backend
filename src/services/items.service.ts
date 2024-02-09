@@ -1,9 +1,9 @@
 import { Tag } from "../models/tag.model";
 import { Item, IItem, Task, ITask, Event, IEvent,
-    Page, IPage,Recipe, IRecipe } from "../models/item.model"
+    Page, IPage,Recipe, IRecipe, ItemType } from "../models/item.model"
 import Profile, { IProfile } from "../models/profile.model";
 import { IUser } from "../models/users.model";
-import mongoose, { HydratedDocument, Model, Types } from "mongoose";
+import mongoose, { HydratedDocument, Model, Schema, Types } from "mongoose";
 
 export interface IFilter {
     search?: string;
@@ -19,6 +19,7 @@ export interface IFilter {
     durationgt: number;
     author?: string;
     sortBy?: string;
+    error?: string;
 }
 
 interface ICondition {
@@ -34,7 +35,7 @@ interface ICondition {
     endDate?: { $lt?: Date, $gt?: Date };
     priority?: string;
     duration?: { $lt?: number, $gt?: number };
-    owner?: Types.ObjectId | string;
+    //owner?: Types.ObjectId | string;
 }
 
 export default class ItemService {
@@ -47,17 +48,17 @@ export default class ItemService {
 
     private getModel(itemType: string): Promise<Model<IItem>> {
         let model;
-        switch (itemType) {
-            case "task":
+        switch (itemType.toUpperCase()) {
+            case ItemType.Task:
                 model = this.task_model;
                 break;
-            case "event":
+            case ItemType.Event:
                 model = this.event_model;
                 break;
-            case "page":
+            case ItemType.Page:
                 model = this.page_model;
                 break;
-            case "recipe":
+            case ItemType.Recipe:
                 model = this.recipe_model;
                 break;
             default:
@@ -69,7 +70,8 @@ export default class ItemService {
 
     public async getItems(
         itemType: string,
-        filter: IFilter
+        filter: IFilter,
+        myItems? : [Schema.Types.ObjectId]
     ): Promise<Array<HydratedDocument<IItem>>> {
         let condition: ICondition = {};
         if (Object.keys(filter).length > 0) { // no filter otherwise
@@ -126,30 +128,33 @@ export default class ItemService {
             if (!!filter.priority) {
                 condition["priority"] = filter.priority;
             }
-            if (!!filter.author) {
-                condition["owner"] = filter.author;
-            }
         }
 
         let items;
 
-        let query = (await this.getModel(itemType)).find(condition);
+        let query;
+        
+        //if (!!myItems) {
+            query = (await myItems).filter(item => condition);
+            items = query.filter(item => item.itemType === itemType);
+        // }
+        // else { --- for publically shared items
+        //     query = (await this.getModel(itemType)).find(condition);
+        //     items = await query.populate({path: "owner", select: "user" });
+        // }
 
         // sort results if sortBy exists
         if (!!filter.sortBy) {
-            query = query.sort(filter.sortBy === "startDate" ? { startDate: 1 } : { startDate : -1 });
-            query = query.sort(filter.sortBy === "endDate" ? { endDate: 1 } : { endDate : -1 });
+            items = items.sort(filter.sortBy === "startDate" ? { startDate: 1 } : { startDate : -1 });
+            items = items.sort(filter.sortBy === "endDate" ? { endDate: 1 } : { endDate : -1 });
         }
-
-        items = await query.populate("owner");
         return items;
     }
 
     public async getItemById(
-        itemType: string,
         id: string
-    ): Promise<HydratedDocument<IItem> | null> {
-        const item = (await this.getModel(itemType)).findById(id);
+    ): Promise<HydratedDocument<IItem>> {
+        const item = this.item_model.findById(id);
         return item as HydratedDocument<any> | null;
     }
 
@@ -170,26 +175,23 @@ export default class ItemService {
     }
     
     public async deletedItem(
-        itemType: string,
         itemId: Types.ObjectId
     ): Promise<IItem | null> {
-        const deletedItem = (await this.getModel(itemType)).findOneAndDelete({ _id: itemId });
+        const deletedItem = await this.item_model.findOneAndDelete({ _id: itemId });
         return deletedItem;
     }
 
     public async editItem(
-        itemType: string,
         id: Types.ObjectId,
         updateObj: any,
     ): Promise<HydratedDocument<IItem> | null> {
-        const model = this.getModel(itemType);
-        const item = (await model).findById(id);
+        const item = await this.item_model.findById(id);
 
         if (!item) {
             return null;
         }
         try {
-            const updatedItem = (await model).findOneAndUpdate(
+            const updatedItem = await this.item_model.findOneAndUpdate(
                 { _id: id },
                 updateObj,
                 { new: true }
@@ -203,10 +205,9 @@ export default class ItemService {
 
     public async ownsItem(
         author_id: Types.ObjectId,
-        itemType: string,
         itemId: Types.ObjectId
     ): Promise<boolean | null> {
-        const item = (await this.getModel(itemType)).findOne({
+        const item = await this.item_model.findOne({
             _id: itemId,
         })
 
@@ -215,7 +216,7 @@ export default class ItemService {
         }
 
         // populate the owner field with Profile
-        await Profile.populate(item, { path: "owner" });
+        await Profile.populate(item, { path: 'owner', select: 'user' });
         // verify that the author_id matches the user id of the poster
         return ((((await item).owner as unknown as HydratedDocument<IProfile>).user) as unknown as HydratedDocument<IUser>)._id.equals(author_id);
     }

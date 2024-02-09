@@ -1,5 +1,13 @@
 import mongoose, { Types, Schema, model } from "mongoose";
 
+export enum ItemType {
+    Item = 'ITEM',
+    Task = 'TASK',
+    Event = 'EVENT',
+    Page = 'PAGE',
+    Recipe = 'RECIPE'
+}
+
 export interface IItem {
     title: string;
     category: string;
@@ -152,9 +160,7 @@ const recipeSchema = new Schema({
 });
 
 export const Item = model<IItem>('Item', itemSchema);
-export const Task = model<ITask>('Task', taskSchema);
-export const Event = model<IEvent>('Event', eventSchema);
-export const Page = model<IPage>('Page', pageSchema);
-export const Recipe = model<IRecipe>('Recipe', recipeSchema);
-
-//export default Item;
+export const Task = Item.discriminator<ITask>('Task', taskSchema);
+export const Event = Item.discriminator<IEvent>('Event', eventSchema);
+export const Page = Item.discriminator<IPage>('Page', pageSchema);
+export const Recipe = Item.discriminator<IRecipe>('Recipe', recipeSchema);

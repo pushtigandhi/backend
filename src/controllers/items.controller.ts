@@ -3,21 +3,15 @@ import { Types, isValidObjectId } from "mongoose";
 import _ from 'lodash';
 
 import ItemService, { IFilter } from "../services/items.service";
-import { Tag } from "../models/tag.model";
+import { ItemType } from "../models/item.model";
+import ProfileService from "../services/profile.service";
 
 export default class ItemsController {
     public itemService = new ItemService();
+    public profileService = new ProfileService();
 
-    public getItems = async (req: Request, res: Response) => {
-        const { itemType } = req.query;
-
-        const author = req.user; // get user
-        if (!author) {
-            return res.status(401).json({ error: 'Unauthorized' });
-        }
-
-        try {
-            const validFields = ["category", "section", "startlt", "startgt", "endlt", "endgt", "duration", "priority", "tags", "icon", "search"];
+    private getValidFilter = (req: Request) => {
+        const validFields = ["category", "section", "startlt", "startgt", "endlt", "endgt", "duration", "priority", "tags", "icon", "search"];
             
             const filter = req.query as any;
 
@@ -37,28 +31,77 @@ export default class ItemsController {
                     filter.endgt = new Date(parseInt(filter.endgt));
                 }
             } catch (e) {
-                return res.status(400).send({message: "Invalid date format"});
+                return {error: "Invalid date format" } as IFilter;
             }
 
-            const validFilter = _.pick(filter, validFields) as IFilter;
+        const validFilter = _.pick(filter, validFields) as IFilter;
+        return validFilter;
+    }
 
-            // validFilter.author = author["_id"].toString();
+    public getMyItems = async (req: Request, res: Response) => {
+        const { itemType } = req.query;
+        
+        const author = req.user; // get user
+        if (!author) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
+        
+        const profile = await this.profileService.getProfileByUserId(
+            author["_id"]
+        );
+        if (!profile) {
+            return res.status(404).json({ error: "Profile not found" });
+        }
 
-            const items = await this.itemService.getItems(itemType.toString(), validFilter);
-            res.status(201).json({items});
-        } catch (error) {
-            console.error(error);
-            res.status(500).json({
-                message: "server error"
-            });
+        await profile.populate("items");
+        
+        const filter = _.difference(_.keys(req.query), ["itemType"]);
+        if (filter.length > 0 || itemType.toString().toUpperCase() !== ItemType.Item){
+            const validFilter = this.getValidFilter(req);
+            if (!!validFilter.error){
+                return res.status(400).send(validFilter.error);
+            }
+            try {
+                const items = await this.itemService.getItems(itemType.toString(), validFilter, profile.items);
+                res.status(201).json({items});
+            } catch (error) {
+                console.error(error);
+                res.status(500).json({
+                    message: "server error"
+                });
+            }
+        }
+        else {
+            res.status(201).json(profile.items);
         }
     }
 
+    /*
+     FOR PUBLIC POSTS 
+      --- create new collection "Posts" that keeps publically shared items of all types 
+      --- search and filter on posts with same conditions 
+    */
+    // public getItems = async (req: Request, res: Response) => {
+    //     const { itemType } = req.query;
+    //     try {
+    //         const validFilter = this.getValidFilter(req);
+    //         if (!!validFilter.error){
+    //             return res.status(400).send(validFilter.error);
+    //         }
+    //         const items = await this.itemService.getItems(itemType.toString(), validFilter);
+    //         res.status(201).json({items});
+    //     } catch (error) {
+    //         console.error(error);
+    //         res.status(500).json({
+    //             message: "server error"
+    //         });
+    //     }
+    // }
+
     public getItemById = async (req: Request, res: Response) => {
-        const { itemType } = req.query;
         try {
             const id = req.params.id;
-            const item = await this.itemService.getItemById(itemType.toString(), id);
+            const item = await this.itemService.getItemById(id);
             if (!item) {
                 return res.status(404).json({ error: 'Item not found' });
             }
@@ -87,9 +130,20 @@ export default class ItemsController {
             if (missingFields.length > 0) {
                 return res.status(400).json({ error: 'Missing required fields', missingFields});
             }
-            const item = await this.itemService.addItem(new Types.ObjectId(author["_id"]), itemType.toString(), newItem);
+            const item = await this.itemService.addItem(new Types.ObjectId(author["_id"]), itemType.toString(), newItem); //itemType is case sensitive: only first letter capitalized.
+            
+            const profile =  await this.profileService.editProfile(
+                item.owner.toString(),
+                { $addToSet: { items: item._id } }
+            );
 
-            res.status(201).json({ item });
+            if (!profile) {
+                return res.status(500).json({
+                  error: "server error",
+                });
+            }
+
+            res.status(201).json({ profile, item });
         } catch (error) {
             console.log(error);
             res.status(500).json({
@@ -99,32 +153,32 @@ export default class ItemsController {
     }
 
     public deleteItem = async (req: Request, res: Response) => {
-        const { itemType } = req.query;
         const { id: itemId } = req.params;
-        // const author = req.user; // get user
-        // if (!author) {
-        //     return res.status(401).json({ error: 'Unauthorized' });
-        // }
+
         try {
             if (!isValidObjectId(itemId)) {
                 return res.status(400).json({ error: 'Invalid item ID' });
             }
             const itemId_ = new Types.ObjectId(itemId);
 
-            // const ownsItem = await this.itemService.ownsItem(new Types.ObjectId(author["_id"]), itemType.toString(), itemId_);
-            // if (ownsItem == null) {
-            //     return res.status(404).json({ error: 'Item not found' });
-            // } else if (!ownsItem) {
-            //     return res.status(403).json({ error: 'Forbidden' });
-            // }
-
-            const deletedItem = await this.itemService.deletedItem(itemType.toString(), itemId_);
+            const deletedItem = await this.itemService.deletedItem(itemId_);
             if (!deletedItem) {
                 console.error(`Item ${itemId} not found during deletion`);
                 return res.status(500).json({ error: 'Server error' });
             }
 
-            return res.status(200).json({ deletedItem });
+            const profile =  await this.profileService.editProfile(
+                deletedItem.owner.toString(),
+                { $pull: { items: deletedItem["_id"] } }
+            );
+
+            if (!profile) {
+                return res.status(500).json({
+                  error: "server error",
+                });
+            }
+
+            return res.status(200).json({ profile, deletedItem });
         } catch (error) {
             console.error(error);
             res.status(500).json({
@@ -137,47 +191,32 @@ export default class ItemsController {
         const { itemType } = req.query;
         const { id: itemId } = req.params;
         
-        // const author = req.user; // get user
-        // if (!author) {
-        //     return res.status(401).json({ error: 'Unauthorized' });
-        // }
-
         try {
             if (!isValidObjectId(itemId)) {
                 return res.status(400).json({ error: 'Invalid item ID' });
             }
             const itemId_ = new Types.ObjectId(itemId);
 
-            // const ownsItem = await this.itemService.ownsItem(new Types.ObjectId(author["_id"]), itemType.toString(), itemId_);
-            // if (ownsItem == null) {
-            //     return res.status(404).json({ error: 'Item not found' });
-            // } else if (!ownsItem) {
-            //     return res.status(403).json({ error: 'Forbidden' });
-            // }
+            const validFields = ["title", "category","section","icon",
+            "favicon","tags","description","startDate",
+            "endDate","duration","repeat","priority","notes"]; //GET() default active properties
 
-            const validFields =  [];
-
-            switch (itemType) {
-                case "task":
+            switch (itemType.toString().toUpperCase()) {
+                case ItemType.Task:
                     let taskFields = ["subtasks"]; //GET() task active properties
                     validFields.push(...taskFields);
-                case "event":
+                case ItemType.Event:
                     let eventFields = ["contacts", "address", "location", "subtasks"]; //GET() event active properties
                     validFields.push(...eventFields);
-                case "page":
+                case ItemType.Page:
                     let pageFields = ["text"]; //GET() page active properties
                     validFields.push(...pageFields);
-                case "recipe":
+                case ItemType.Recipe:
                     let recipeFields = ["ingredients", "directions"]; //GET() recipe active properties
                     validFields.push(...recipeFields);
                 default:
-                    let defaultFields = ["title", "category","section","icon",
-                        "favicon","tags","description","startDate",
-                        "endDate","duration","repeat","priority","notes"]; //GET() default active properties
-                    validFields.push(...defaultFields);
+                    break;
             }
-
-            console.log("validFields: " + validFields);
 
             let update = _.pick(req.body, validFields);
             
@@ -188,7 +227,6 @@ export default class ItemsController {
             }
 
             const result = await this.itemService.editItem(
-                itemType.toString(),
                 itemId_,
                 update
             );
@@ -211,240 +249,30 @@ export default class ItemsController {
         }
     };
 
-    // public editTask = async (req: Request, res: Response, itemType: string) => {
-    //     const { id: taskId } = req.params;
-    
-    //     try {
-    //         if (!isValidObjectId(taskId)) {
-    //             return res.status(400).json({ error: 'Invalid task ID' });
-    //         }
-    //         const taskId_ = new Types.ObjectId(taskId);
-    
-    //         let update = _.pick(req.body, [
-    //             "title",
-    //             "category",
-    //             "section",
-    //             "icon",
-    //             "favicon",
-    //             "tags",
-    //             "description",
-    //             "startDate",
-    //             "endDate",
-    //             "duration",
-    //             "repeat",
-    //             "priority",
-    //             "notes",
-    //             "subtasks"
-    //         ]);
-    
-    //         if (Object.keys(update).length === 0) {
-    //             return res.status(400).json({
-    //                 error: "No fields were modifiable",
-    //             });
-    //         }
-    
-    //         const result = await this.itemService.editItem(
-    //             itemType,
-    //             taskId_,
-    //             update
-    //         );
-    
-    //         if (!result) {
-    //             return res.status(500).json({
-    //                 error: "server error",
-    //             });
-    //         } else {
-    //             return res.status(200).json({
-    //                 message: "Successfully updated",
-    //                 task: result,
-    //             });
-    //         }
-    //     } catch (error: any) {
-    //         console.error(error);
-    //         res.status(500).json({
-    //             message: "Server error",
-    //         });
-    //     }
-    // };
+    public ownsItem = async (req: Request, res: Response) => {
+        const { id: itemId } = req.params
+        
+        const author = req.user; // get user
+        if (!author) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
 
-    // public editEvent = async (req: Request, res: Response, itemType: string) => {
-    //     const { id: eventId } = req.params;
-
-    //     try {
-    //         if (!isValidObjectId(eventId)) {
-    //             return res.status(400).json({ error: 'Invalid event ID' });
-    //         }
-    //         const eventId_ = new Types.ObjectId(eventId);
-
-    //         let update = _.pick(req.body, [
-    //             "title",
-    //             "category",
-    //             "section",
-    //             "icon",
-    //             "favicon",
-    //             "tags",
-    //             "description",
-    //             "startDate",
-    //             "endDate",
-    //             "duration",
-    //             "repeat",
-    //             "priority",
-    //             "notes",
-    //             "contacts",
-    //             "address",
-    //             "location",
-    //             "subtasks"
-    //         ]);
-
-    //         if (Object.keys(update).length === 0) {
-    //             return res.status(400).json({
-    //                 error: "No fields were modifiable",
-    //             });
-    //         }
-
-    //         const result = await this.itemService.editItem(
-    //             itemType,
-    //             eventId_,
-    //             update
-    //         );
-
-    //         if (!result) {
-    //             return res.status(500).json({
-    //                 error: "server error",
-    //             });
-    //         } else {
-    //             return res.status(200).json({
-    //                 message: "Successfully updated",
-    //                 event: result,
-    //             });
-    //         }
-    //     } catch (error: any) {
-    //         console.error(error);
-    //         res.status(500).json({
-    //             message: "Server error",
-    //         });
-    //     }
-    // };
-
-    // public editPage = async (req: Request, res: Response, itemType: string) => {
-    //     const { id: pageId } = req.params;
-
-    //     try {
-    //         if (!isValidObjectId(pageId)) {
-    //             return res.status(400).json({ error: 'Invalid page ID' });
-    //         }
-    //         const pageId_ = new Types.ObjectId(pageId);
-
-    //         let update = _.pick(req.body, [
-    //             "title",
-    //             "category",
-    //             "section",
-    //             "icon",
-    //             "favicon",
-    //             "tags",
-    //             "description",
-    //             "startDate",
-    //             "endDate",
-    //             "duration",
-    //             "repeat",
-    //             "priority",
-    //             "notes",
-    //             "text"
-    //         ]);
-
-    //         if (Object.keys(update).length === 0) {
-    //             return res.status(400).json({
-    //                 error: "No fields were modifiable",
-    //             });
-    //         }
-
-    //         const result = await this.itemService.editItem(
-    //             itemType,
-    //             pageId_,
-    //             update
-    //         );
-
-    //         if (!result) {
-    //             return res.status(500).json({
-    //                 error: "server error",
-    //             });
-    //         } else {
-    //             return res.status(200).json({
-    //                 message: "Successfully updated",
-    //                 page: result,
-    //             });
-    //         }
-    //     } catch (error: any) {
-    //         console.error(error);
-    //         res.status(500).json({
-    //             message: "Server error",
-    //         });
-    //     }
-    // };
-
-    // public editRecipe = async (req: Request, res: Response, itemType: string) => {
-    //     const { id: recipeId } = req.params;
-
-    //     try {
-    //         if (!isValidObjectId(recipeId)) {
-    //             return res.status(400).json({ error: 'Invalid recipe ID' });
-    //         }
-    //         const recipeId_ = new Types.ObjectId(recipeId);
-
-    //         let update = _.pick(req.body, [
-    //             "title",
-    //             "category",
-    //             "section",
-    //             "icon",
-    //             "favicon",
-    //             "tags",
-    //             "description",
-    //             "startDate",
-    //             "endDate",
-    //             "duration",
-    //             "repeat",
-    //             "priority",
-    //             "notes",
-    //             "ingredients",
-    //             "directions"
-    //         ]);
-
-    //         if (Object.keys(update).length === 0) {
-    //             return res.status(400).json({
-    //                 error: "No fields were modifiable",
-    //             });
-    //         }
-
-    //         const result = await this.itemService.editItem(
-    //             itemType,
-    //             recipeId_,
-    //             update
-    //         );
-
-    //         if (!result) {
-    //             return res.status(500).json({
-    //                 error: "server error",
-    //             });
-    //         } else {
-    //             return res.status(200).json({
-    //                 message: "Successfully updated",
-    //                 recipe: result,
-    //             });
-    //         }
-    //     } catch (error: any) {
-    //         console.error(error);
-    //         res.status(500).json({
-    //             message: "Server error",
-    //         });
-    //     }
-    // };
-
-
-    ///delete later 
-    
-    public deleteItems = async (req: Request, res: Response) => {
-        const { itemType } = req.query;
-        const deletedItem = await this.itemService.deletedItems();
+        try {
+            if (!isValidObjectId(itemId)) {
+                return res.status(400).json({ error: 'Invalid item ID' });
+            }
+            const itemId_ = new Types.ObjectId(itemId);
+            const ownsItem = await this.itemService.ownsItem(new Types.ObjectId(author["_id"]), itemId_);
+            if (ownsItem == null) {
+                return res.status(404).json({ error: 'Item not found' });
+            } else if (!ownsItem) {
+                return res.status(403).json({ error: 'Forbidden' });
+            }
+        } catch (error: any) {
+            console.error(error);
+            res.status(500).json({
+                message: "Server error",
+            });
+        }
     }
-
 }

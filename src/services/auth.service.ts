@@ -68,7 +68,14 @@ export default class AuthService {
                 },
             },
         });
-        const user = await newUser.save();
+        let user;
+        try{
+            user = await newUser.save();
+
+        }
+        catch (err) {
+            console.log(err);
+        }
         
         // create a profile for the user
         await this.profile_model.create({
