@@ -39,7 +39,7 @@ export default class ContactsController {
         let newContact = req.body;
         
         try {
-            newContact = _.pick(newContact, ["name"]);
+            newContact = _.pick(newContact, ["name", "company", "phoneNumber", "notes"]);
 
             const missingFields = _.difference(["name"], Object.keys(newContact));
             if (missingFields.length > 0) {

@@ -14,6 +14,7 @@ export default class UsersRoute implements Route {
         this.router.get('/', this.userController.getUsers);
         this.router.get('/me', verifyAuth, this.userController.getMe);
         this.router.post('/', this.userController.createTestUser);
+        this.router.post('/profile', this.userController.createTestProfile);
         this.router.delete('/', this.userController.clearUsers);
     }
 }

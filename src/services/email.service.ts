@@ -15,11 +15,11 @@ export default class EmailService {
       return transport;
     } else {
       let transporter = nodemailer.createTransport({
-        service: process.env.EMAIL_SMTP_SERVICE || "hotmail",
-        auth: {
-          user: account.user, 
-          pass: account.pass,
-        },
+          host: 'smtp.ethereal.email',
+          auth: {
+              user: account.user,
+              pass: account.pass
+          }
       });
       return transporter;
     }
@@ -44,7 +44,7 @@ export default class EmailService {
         const transporter = await this.getTransporter(account);
 
         const verfiyEmailHTML = await fs.promises.readFile(path.join(__dirname, "../emails/verifyEmail.html"), "utf8"); // read the html file
-        
+
         // send mail with defined transport object
         let info = await transporter.sendMail({
             from: account.user,
@@ -53,7 +53,7 @@ export default class EmailService {
             text: `Please verify your email using the following link (expires in 6 hours): ${verification_url}`,
             html: verfiyEmailHTML.replace('$VERIFICATION_URL', verification_url),
         });
-
+        
         if (process.env.NODE_ENV === "development") {
             console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
         }
@@ -85,7 +85,6 @@ export default class EmailService {
                 return false;
             } else {
                 const profile = await Profile.findOne({ user: user._id });
-                console.log(profile);
                 user.emailVerification.isVerified = true;
                 await user.save();
                 if (profile) {

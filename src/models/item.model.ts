@@ -1,20 +1,12 @@
-import mongoose, { Schema, model } from "mongoose";
+import mongoose, { Types, Schema, model } from "mongoose";
 
-export interface ITag {
-    name: string;
-    color: string;
+export enum ItemType {
+    Item = 'ITEM',
+    Task = 'TASK',
+    Event = 'EVENT',
+    Page = 'PAGE',
+    Recipe = 'RECIPE'
 }
-
-const tagSchema = new Schema<ITag>({
-    name: {
-        type: String,
-        required: true
-    },
-    color: {
-        type: String,
-        default: "#FAFAFC"
-    }
-});
 
 export interface IItem {
     title: string;
@@ -25,7 +17,7 @@ export interface IItem {
         data: Buffer;
         contentType: string;
     };
-    tags?: [ITag];
+    tags: [string];
     description?: string;
     startDate?: Date;
     endDate?: Date;
@@ -35,6 +27,7 @@ export interface IItem {
     notes?: [string];
     createdAt: Date;
     updatedAt?: Date;
+    owner: Types.ObjectId;
 }
 
 const itemSchema = new mongoose.Schema(
@@ -60,7 +53,7 @@ const itemSchema = new mongoose.Schema(
             contentType: String,
         },
         tags: {
-            type: [tagSchema],
+            type: [String],
         },
         description: {
             type: String,
@@ -83,7 +76,12 @@ const itemSchema = new mongoose.Schema(
         },
         notes: {
             type: [String],
-        }
+        },
+        owner: {
+            type: Types.ObjectId,
+            ref: 'Profile',
+            required: true
+        },
     },
     {
         timestamps: true,
@@ -109,7 +107,7 @@ export interface IEvent extends IItem {
     contacts: [Schema.Types.ObjectId],
     location: string,
     address: Schema.Types.ObjectId,
-    checklist: [string],
+    subtasks: [string],
 }
 
 const eventSchema = new Schema({
@@ -118,6 +116,7 @@ const eventSchema = new Schema({
     
     contacts: {
         type: [Schema.Types.ObjectId],
+        ref: "Contact",
     },
     location: {
         type: String,
@@ -126,7 +125,7 @@ const eventSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: "Address",
     },
-    checklist: {
+    subtasks: {
         type: [String],
     }
 });
@@ -162,10 +161,7 @@ const recipeSchema = new Schema({
 });
 
 export const Item = model<IItem>('Item', itemSchema);
-export const Task = model<ITask>('Task', taskSchema);
-export const Event = model<IEvent>('Event', eventSchema);
-export const Page = model<IPage>('Page', pageSchema);
-export const Recipe = model<IRecipe>('Recipe', recipeSchema);
-export const Tag = model<ITag>('Tag', tagSchema);
-
-//export default Item;
+export const Task = Item.discriminator<ITask>('Task', taskSchema);
+export const Event = Item.discriminator<IEvent>('Event', eventSchema);
+export const Page = Item.discriminator<IPage>('Page', pageSchema);
+export const Recipe = Item.discriminator<IRecipe>('Recipe', recipeSchema);

@@ -32,7 +32,6 @@ export default class AuthService {
         const user: HydratedDocument<IUser> | null = await User.findOne({
             email: email,
         });
-        const users = await User.find({}, { _id: 1, email: 1 });
         if (!user) {
             return { success: false, message: "User not found" };
         } else {
@@ -69,7 +68,14 @@ export default class AuthService {
                 },
             },
         });
-        const user = await newUser.save();
+        let user;
+        try{
+            user = await newUser.save();
+
+        }
+        catch (err) {
+            console.log(err);
+        }
         
         // create a profile for the user
         await this.profile_model.create({

@@ -7,9 +7,8 @@ export default class ProfileController {
 
   public getMe = async (req: Request, res: Response) => {
     try {
-      const id = req.params.id;
       const profile = await this.profileService.getProfileByUserId(
-        id
+        req.user!["_id"]
       ); // req.user is set by passport in middleware
       if (!profile) {
         return res.status(404).json({ error: "Profile not found for user" });
@@ -29,7 +28,7 @@ export default class ProfileController {
   public getProfileById = async (req: Request, res: Response) => {
     try {
       const profile = await this.profileService.getProfileById(
-        req.params.profileID
+        req.params.id
       );
       if (!profile) {
         return res.status(404).json({ error: "Profile not found" });
@@ -48,10 +47,8 @@ export default class ProfileController {
 
   public editProfile = async (req: Request, res: Response) => {
     try {
-      const id = req.params.id;
-
       const profile = await this.profileService.getProfileByUserId(
-        id
+        req.user!["_id"]
       ); // req.user is set by passport in middleware
       if (!profile) {
         return res.status(404).json({ error: "Profile not found for user" });
@@ -61,6 +58,8 @@ export default class ProfileController {
         "bio",
         "displayName",
         "avatarImage",
+        "items",
+        "directory"
       ]);
 
       if (Object.keys(update).length === 0) {
