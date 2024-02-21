@@ -13,6 +13,7 @@ export interface IUser {
             expiresAt: Date;
         }
     }
+    handle: string;
     validatePassword(password: string): Promise<boolean>;
 }
 
@@ -42,6 +43,11 @@ const userSchema = new Schema<IUser>({
                 required: true,
             },
         },
+    },
+    handle: {
+        type: String,
+        required: true,
+        unique: true,
     }
 });
 

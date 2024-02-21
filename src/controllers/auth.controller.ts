@@ -1,21 +1,41 @@
 import { NextFunction, Request, Response } from "express";
 import AuthService from "../services/auth.service";
 import EmailService from "../services/email.service";
+import ContactService from "../services/contacts.service";
+import Profile from "../models/profile.model";
 
 export default class AuthController {
   public authService = new AuthService();
   public emailService = new EmailService();
+  public contactService = new ContactService();
+  public profile_model = Profile;
 
   public signup = async (req: Request, res: Response, next: NextFunction) => {
-    const { email: email_, password } = req.body;
+    const { email: email_, password, handle, firstName, lastName } = req.body;
     try {
-      if (!email_ || !password) {
+      
+      if (!email_ || !password || !handle || !firstName || !lastName) {
         return res.status(400).json({
-          message: "Fields email and password are required",
+          message: "Fields email, password, handle, first and last names are required",
         });
       }
       const email = email_.toLowerCase();
-      const user = await this.authService.signup(email, password);
+      const user = await this.authService.signup(email, password, handle);
+
+
+      const contact = await this.contactService.addContact({
+        name: firstName.toString() + " " + lastName.toString()
+      })
+
+      // create a profile for the user
+      await this.profile_model.create({
+          user: user._id,
+          emailInfo: {
+              isVerified: false,
+              email: email,
+          },
+          contactCard: contact["_id"]
+      });
 
       // send verification email
       const sentVerificationEmail = await this.authService.requestNewEmailToken(email, this.emailService);

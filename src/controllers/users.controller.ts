@@ -34,6 +34,20 @@ export default class UsersController {
         }
     }
 
+    public getUserByHandle = async (req: Request, res: Response) => {
+        const { userHandle } = req.query;
+        
+        try {
+            const user = await this.userService.getUserByHandle(userHandle.toString());
+            res.status(200).json({user});
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({error});
+        }
+    }
+
+
+    //to delete (all below)
     public createTestUser = async (req: Request, res: Response) => {
         try {
             

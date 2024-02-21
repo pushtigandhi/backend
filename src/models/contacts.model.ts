@@ -39,13 +39,13 @@ const addressSchema = new mongoose.Schema({
 
 export interface IContact {
     name: string;
-    company: string;
-    birthday: Date;
-    phoneNumber: Number;
-    notes: string;
-    address: IAddress;
-    createdAt: Date;
-    updatedAt: Date;
+    company?: string;
+    birthday?: Date;
+    phoneNumber?: Number;
+    notes?: string;
+    address?: IAddress;
+    createdAt?: Date;
+    updatedAt?: Date;
 }
 
 const contactSchema = new mongoose.Schema(
