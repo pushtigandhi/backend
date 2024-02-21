@@ -17,6 +17,21 @@ const categorySchema = new Schema<ICategory>({
     }],
 })
 
+interface ICategory {
+    title: string;
+    sections: [string];
+}
+
+const categorySchema = new Schema<ICategory>({
+    title: {
+        type: String,
+        required: true,
+    },
+    sections: [{
+      type: String,
+    }],
+})
+
 export interface IProfile {
   user: IUser;
   avatar: Schema.Types.Mixed;
