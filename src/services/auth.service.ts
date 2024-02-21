@@ -56,7 +56,7 @@ export default class AuthService {
         return token;
     }
 
-    public async signup(email: string, password: string): Promise<HydratedDocument<IUser>> {
+    public async signup(email: string, password: string, handle: string): Promise<HydratedDocument<IUser>> {
         const newUser = new this.users_model({
             email,
             password,
@@ -67,6 +67,7 @@ export default class AuthService {
                     expiresAt: new Date(Date.now() + parseInt(process.env.EMAIL_TOKEN_AGE || "2160000")), // 6 hours default
                 },
             },
+            handle,
         });
         let user;
         try{
@@ -76,16 +77,6 @@ export default class AuthService {
         catch (err) {
             console.log(err);
         }
-        
-        // create a profile for the user
-        await this.profile_model.create({
-            user: user._id,
-            emailInfo: {
-                isVerified: false,
-                email: email,
-            }
-        });
-        
         return user;
     }
 

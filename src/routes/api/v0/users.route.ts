@@ -13,6 +13,8 @@ export default class UsersRoute implements Route {
     private initializeRoutes() {
         this.router.get('/', this.userController.getUsers);
         this.router.get('/me', verifyAuth, this.userController.getMe);
+        this.router.get('/handle', verifyAuth, this.userController.getUserByHandle);
+        //delete the below
         this.router.post('/', this.userController.createTestUser);
         this.router.post('/profile', this.userController.createTestProfile);
         this.router.delete('/', this.userController.clearUsers);

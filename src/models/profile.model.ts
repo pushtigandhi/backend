@@ -1,5 +1,21 @@
 import mongoose, { Schema, model } from "mongoose";
 import { IUser } from "./users.model";
+import Contact from "./contacts.model";
+
+interface ICategory {
+    title: string;
+    sections: [string];
+}
+
+const categorySchema = new Schema<ICategory>({
+    title: {
+        type: String,
+        required: true,
+    },
+    sections: [{
+      type: String,
+    }],
+})
 
 interface ICategory {
     title: string;
@@ -28,6 +44,8 @@ export interface IProfile {
   }
   items: [Schema.Types.ObjectId];
   directory: [ICategory];
+  contactCard: Schema.Types.ObjectId;
+  contacts: [Schema.Types.ObjectId];
 }
 
 const profileSchema = new mongoose.Schema(
@@ -55,7 +73,15 @@ const profileSchema = new mongoose.Schema(
       default: [
         {'title': 'Backlog'}
       ]
-    }
+    },
+    contactCard: {
+      type: Schema.Types.ObjectId,
+      ref: 'Contact',
+    }, 
+    contacts: [{
+      type: Schema.Types.ObjectId,
+      ref: 'Contact',
+    }],
   },
   {
     timestamps: true,
