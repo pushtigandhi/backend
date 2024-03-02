@@ -14,7 +14,7 @@ export default class DirectoryRoute implements Route {
     private initializeRoutes() {
         this.router.get('/:id', this.directoryController.getCategories); 
         this.router.post('/:id', this.directoryController.addCategory);
-        this.router.delete('/:id', this.directoryController.deleteCategory);
-        this.router.patch('/:id', this.directoryController.editCategory); 
+        this.router.delete('/:id', verifyAuth, this.directoryController.deleteCategory);
+        this.router.patch('/:id', verifyAuth, this.directoryController.editCategory); 
     }
 }

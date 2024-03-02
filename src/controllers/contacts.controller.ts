@@ -3,14 +3,29 @@ import { Types, isValidObjectId } from "mongoose";
 import _ from 'lodash';
 
 import ContactService from "../services/contacts.service";
+import ProfileService from "../services/profile.service";
 
 export default class ContactsController {
-    public contactService = new ContactService();
+    private contactService = new ContactService();
+    private profileService = new ProfileService();
 
     public getContacts = async (req: Request, res: Response) => {
         try {
-            const contacts = await this.contactService.getContacts();
-            res.status(201).json({contacts});
+            const author = req.user; // get user
+            if (!author) {
+                return res.status(401).json({ error: 'Unauthorized' });
+            }
+            
+            const profile = await this.profileService.getProfileByUserId(
+                author["_id"]
+            );
+            if (!profile) {
+                return res.status(404).json({ error: "Profile not found" });
+            }
+
+            await profile.populate("contacts");
+
+            res.status(201).json(profile.contacts);
         } catch (error) {
             console.log(error);
             res.status(500).json({

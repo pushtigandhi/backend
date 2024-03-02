@@ -34,12 +34,16 @@ export default class DirectoryController {
     public deleteCategory = async (req: Request, res: Response) => {
         const { deletedId } = req.body;
 
-        const profile =  await this.profileService.getProfileById(req.params.id);
+        const author = req.user; // get user
+        if (!author) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
         
+        const profile = await this.profileService.getProfileByUserId(
+            author["_id"]
+        );
         if (!profile) {
-            return res.status(500).json({
-              error: 'Profile not found',
-            });
+            return res.status(404).json({ error: "Profile not found" });
         }
 
         const index = profile.directory.findIndex(cat => cat["_id"].toString() === deletedId);
@@ -58,12 +62,16 @@ export default class DirectoryController {
     public editCategory = async (req: Request, res: Response) => {
         const { updatedId } = req.body;
 
-        const profile =  await this.profileService.getProfileById(req.params.id);
+        const author = req.user; // get user
+        if (!author) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
         
+        const profile = await this.profileService.getProfileByUserId(
+            author["_id"]
+        );
         if (!profile) {
-            return res.status(500).json({
-              error: 'Profile not found',
-            });
+            return res.status(404).json({ error: "Profile not found" });
         }
 
         try {

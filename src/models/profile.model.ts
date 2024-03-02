@@ -6,30 +6,16 @@ interface ICategory {
     title: string;
     sections: [string];
 }
-
 const categorySchema = new Schema<ICategory>({
     title: {
         type: String,
-        required: true,
+        required: true, 
+        //unique within profile. Handled frontend
     },
-    sections: [{
-      type: String,
-    }],
-})
-
-interface ICategory {
-    title: string;
-    sections: [string];
-}
-
-const categorySchema = new Schema<ICategory>({
-    title: {
-        type: String,
-        required: true,
+    sections: {
+      type: [String],
+      default: ["All"],
     },
-    sections: [{
-      type: String,
-    }],
 })
 
 export interface IProfile {
@@ -71,7 +57,7 @@ const profileSchema = new mongoose.Schema(
     directory: {
       type: [categorySchema],
       default: [
-        {'title': 'Backlog'}
+        {'title': 'Backlog', 'sections': ["All"]}
       ]
     },
     contactCard: {

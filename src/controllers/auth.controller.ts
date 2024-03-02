@@ -24,7 +24,8 @@ export default class AuthController {
 
 
       const contact = await this.contactService.addContact({
-        name: firstName.toString() + " " + lastName.toString()
+        name: firstName.toString() + " " + lastName.toString(),
+        handle: handle.toString()
       })
 
       // create a profile for the user

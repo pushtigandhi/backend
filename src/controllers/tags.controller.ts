@@ -80,22 +80,6 @@ export default class TagsController {
         }
     }
 
-    //delete later
-    public deleteTags = async (req: Request, res: Response) => {
-        try {
-
-            const deletedTag = await this.tagService.deletedTags();
-            
-
-            return res.status(200).json({ deletedTag });
-        } catch (error) {
-            console.error(error);
-            res.status(500).json({
-                message: "server error"
-            });
-        }
-    }
-
     public editTag = async (req: Request, res: Response) => {
         const { id: tagId } = req.params;
         try {

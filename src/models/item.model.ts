@@ -8,10 +8,29 @@ export enum ItemType {
     Recipe = 'RECIPE'
 }
 
+const validateTimeFormat = (value) => {
+    const timeFormat = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
+    return timeFormat.test(value);
+}
+
+interface IsubTask {
+    isChecked: Boolean;
+    task: string;
+}
+const subtaskSchema = new Schema<IsubTask>({
+    isChecked: {
+        type: Boolean,
+        default: false,
+    },
+    task: {
+      type: String,
+    },
+})
+
 export interface IItem {
     title: string;
     category: string;
-    section?: string;
+    section: string;
     icon: string;
     favicon?: {
         data: Buffer;
@@ -21,10 +40,12 @@ export interface IItem {
     description?: string;
     startDate?: Date;
     endDate?: Date;
+    startTime?: String;
+    endTime?: String;
     duration?: Number;
     repeat?: [string];
     priority?: string;
-    notes?: [string];
+    notes?: string;
     createdAt: Date;
     updatedAt?: Date;
     owner: Types.ObjectId;
@@ -43,6 +64,7 @@ const itemSchema = new mongoose.Schema(
         },
         section: {
             type: String,
+            default: "All",
         },
         icon: {
             type: String,
@@ -64,18 +86,27 @@ const itemSchema = new mongoose.Schema(
         endDate: {
             type: Date,
         },
+        startTime: { 
+            type: String, 
+            match: /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/ 
+        },
+        endTime: { 
+            type: String, 
+            match: /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/ 
+        },
         duration: {
             type: Number,
         },
         repeat: {
-            type: [String],
+            type: String,
+            enum: ["ONCE", "DAILY", "WEEKLY", "MONTHLY"],
         },
         priority: {
             type: String,
             enum: ["LOW", "MEDIUM", "HIGH"],
         },
         notes: {
-            type: [String],
+            type: String,
         },
         owner: {
             type: Types.ObjectId,
@@ -90,7 +121,7 @@ const itemSchema = new mongoose.Schema(
 );
 
 export interface ITask extends IItem {
-    subtasks: [String],
+    subtasks: [IsubTask],
 }
 
 const taskSchema = new Schema({
@@ -98,7 +129,7 @@ const taskSchema = new Schema({
     ...itemSchema.obj,
 
     subtasks: {
-        type: [String],
+        type: [subtaskSchema],
         default: [],
     }
 });

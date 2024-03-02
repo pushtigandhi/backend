@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import Route from '@interfaces/route.interface';
 import ContactsController from '../../../controllers/contacts.controller';
+import { verifyAuth } from "../../../middlewares/auth.middleware";
 
 export default class ContactsRoute implements Route {
     public router: Router = Router();
@@ -11,7 +12,7 @@ export default class ContactsRoute implements Route {
     }
 
     private initializeRoutes() {
-        this.router.get('/', this.contactController.getContacts);
+        this.router.get('/', verifyAuth, this.contactController.getContacts);
         this.router.get('/:id', this.contactController.getContactById);
         this.router.post('/', this.contactController.addContact);
         this.router.delete('/:id', this.contactController.deleteContact);

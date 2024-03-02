@@ -136,7 +136,10 @@ export default class ItemService {
         
         //if (!!myItems) {
             query = (await myItems).filter(item => condition);
-            items = query.filter(item => item.itemType === itemType);
+            if(itemType !== "item")
+                items = query.filter(item => item.itemType === itemType);
+            else
+                items = query;
         // }
         // else { --- for publically shared items
         //     query = (await this.getModel(itemType)).find(condition);

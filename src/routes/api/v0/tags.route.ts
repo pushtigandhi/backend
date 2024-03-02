@@ -16,7 +16,6 @@ export default class TagsRoute implements Route {
         this.router.get('/:id', this.tagController.getTagById);
         this.router.post('/', verifyAuth, this.tagController.addTag);
         this.router.delete('/:id', this.tagController.deleteTag);
-        this.router.delete('/', this.tagController.deleteTags);
         this.router.patch('/:id', this.tagController.editTag);
     }
 }
