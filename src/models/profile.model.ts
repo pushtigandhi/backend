@@ -1,26 +1,48 @@
 import mongoose, { Schema, model } from "mongoose";
 import { IUser } from "./users.model";
 import Contact from "./contacts.model";
+import { IImage } from "./image.model";
+
+
+interface ISection {
+  title: string;
+  view: string;
+}
+const sectionSchema = new Schema<ISection>({
+  title: {
+    type: String,
+    required: true, 
+    //unique within profile. Handled frontend
+  },
+  view: {
+    type: String,
+  },
+})
 
 interface ICategory {
     title: string;
-    sections: [string];
+    color: string;
+    sections: [ISection];
 }
 const categorySchema = new Schema<ICategory>({
     title: {
-        type: String,
-        required: true, 
-        //unique within profile. Handled frontend
+      type: String,
+      required: true, 
+      //unique within profile. Handled frontend
+    },
+    color: {
+      type: String,
+      default: "rgba(193, 192, 200, 1)",
     },
     sections: {
-      type: [String],
-      default: ["All"],
+      type: [sectionSchema],
+      default: [{title: "All", view: ""}],
     },
 })
 
 export interface IProfile {
   user: IUser;
-  avatar: Schema.Types.Mixed;
+  avatar: IImage;
   displayName: string;
   createdAt: Date;
   updatedAt: Date;
@@ -41,7 +63,8 @@ const profileSchema = new mongoose.Schema(
       ref: "User",
     },
     avatar: {
-      type: Schema.Types.Mixed,
+      type: Schema.Types.ObjectId,
+      ref: "Image",
     },
     displayName: {
       type: String,
@@ -57,7 +80,9 @@ const profileSchema = new mongoose.Schema(
     directory: {
       type: [categorySchema],
       default: [
-        {'title': 'Backlog', 'sections': ["All"]}
+        {'title': 'Backlog', 'sections': ["All"]},
+        {'title': 'Cookbook', 'sections': ["All", "Recipes", "Resources"]},
+        {'title': 'Journal', 'sections': ["All", "Resources"]},
       ]
     },
     contactCard: {

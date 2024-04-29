@@ -5,24 +5,34 @@ export default class DirectoryController {
     public profileService = new ProfileService();
 
     public getCategories = async (req: Request, res: Response) => {
-        const profile =  await this.profileService.getProfileById(req.params.id);
-
+        const author = req.user; // get user
+        if (!author) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
+        
+        const profile = await this.profileService.getProfileByUserId(
+            author["_id"]
+        );
         if (!profile) {
             return res.status(404).json({ error: "Profile not found" });
         }
-
+        
         res.status(201).json(profile.directory);
     }
     
     public addCategory = async (req: Request, res: Response) => {
         let newCategory = req.body;
 
-        const profile =  await this.profileService.getProfileById(req.params.id);
+        const author = req.user; // get user
+        if (!author) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
         
+        const profile = await this.profileService.getProfileByUserId(
+            author["_id"]
+        );
         if (!profile) {
-            return res.status(500).json({
-              error: 'Profile not found',
-            });
+            return res.status(404).json({ error: "Profile not found" });
         }
 
         profile.directory.push(newCategory);

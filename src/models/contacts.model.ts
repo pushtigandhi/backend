@@ -39,7 +39,7 @@ const addressSchema = new mongoose.Schema({
 
 export interface IContact {
     name: string;
-    handle: string;
+    handle?: string;
     company?: string;
     birthday?: Date;
     phoneNumber?: Number;

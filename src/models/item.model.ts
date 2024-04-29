@@ -5,12 +5,8 @@ export enum ItemType {
     Task = 'TASK',
     Event = 'EVENT',
     Page = 'PAGE',
-    Recipe = 'RECIPE'
-}
-
-const validateTimeFormat = (value) => {
-    const timeFormat = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
-    return timeFormat.test(value);
+    Recipe = 'RECIPE',
+    Scheduled = 'SCHEDULED',
 }
 
 interface IsubTask {
@@ -38,13 +34,6 @@ export interface IItem {
     };
     tags: [string];
     description?: string;
-    startDate?: Date;
-    endDate?: Date;
-    startTime?: String;
-    endTime?: String;
-    duration?: Number;
-    repeat?: [string];
-    priority?: string;
     notes?: string;
     createdAt: Date;
     updatedAt?: Date;
@@ -80,30 +69,8 @@ const itemSchema = new mongoose.Schema(
         description: {
             type: String,
         },
-        startDate: {
-            type: Date,
-        },
-        endDate: {
-            type: Date,
-        },
-        startTime: { 
-            type: String, 
-            match: /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/ 
-        },
-        endTime: { 
-            type: String, 
-            match: /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/ 
-        },
         duration: {
             type: Number,
-        },
-        repeat: {
-            type: String,
-            enum: ["ONCE", "DAILY", "WEEKLY", "MONTHLY"],
-        },
-        priority: {
-            type: String,
-            enum: ["LOW", "MEDIUM", "HIGH"],
         },
         notes: {
             type: String,
@@ -121,62 +88,109 @@ const itemSchema = new mongoose.Schema(
 );
 
 export interface ITask extends IItem {
+    isChecked: Boolean,
     subtasks: [IsubTask],
+    priority?: string;
 }
 
 const taskSchema = new Schema({
     // Include properties from the base IITem
     ...itemSchema.obj,
 
+    isChecked: {
+        type: Boolean,
+        default: false,
+    },
     subtasks: {
         type: [subtaskSchema],
         default: [],
-    }
+    },
+    priority: {
+        type: String,
+        enum: ["NONE", "LOW", "MEDIUM", "HIGH"],
+    },
 });
 
-export interface IEvent extends IItem {
-    contacts: [Schema.Types.ObjectId],
+export interface IScheduled extends IItem {
+    startDate?: Date;
+    endDate: Date;
+    isChecked: Boolean,
+    repeat: [string];
+    priority?: string;
+    scheduledItem: [Schema.Types.ObjectId],
+}
+
+const scheduledSchema = new Schema({
+
+    ...itemSchema.obj,
+
+    startDate: {
+        type: Date,
+    },
+    endDate: {
+        type: Date,
+    },
+    repeat: {
+        type: String,
+        enum: ["ONCE", "DAILY", "WEEKLY", "MONTHLY"],
+    },
+    priority: {
+        type: String,
+        enum: ["NONE", "LOW", "MEDIUM", "HIGH"],
+    },
+    scheduledItem: {
+        type: Types.ObjectId,
+        ref: "Item",
+        required: true
+    },
+});
+
+export interface IEvent extends IScheduled {
     location: string,
-    address: Schema.Types.ObjectId,
-    subtasks: [string],
+    contacts: [Schema.Types.ObjectId],
+    address?: Schema.Types.ObjectId,
+    subtasks: [IsubTask],
 }
 
 const eventSchema = new Schema({
 
-    ...itemSchema.obj,
+    ...scheduledSchema.obj,
     
-    contacts: {
-        type: [Schema.Types.ObjectId],
-        ref: "Contact",
-    },
     location: {
         type: String,
+    },
+    contacts: {
+        type: [Schema.Types.ObjectId],
+        default: [],
+        ref: "Contact",
     },
     address: {
         type: Schema.Types.ObjectId,
         ref: "Address",
     },
     subtasks: {
-        type: [String],
+        type: [subtaskSchema],
+        default: [],
     }
 });
 
 export interface IPage extends IItem {
-    text: string,
+    notes: string,
 }
 
 const pageSchema = new Schema({
 
     ...itemSchema.obj,
     
-    text: {
+    notes: {
         type: String,
     }
 });
 
 export interface IRecipe extends IItem {
-    ingredients: [string],
-    directions: [string],
+    ingredients: [IsubTask],
+    instructions: [IsubTask],
+    servings: number
 }
 
 const recipeSchema = new Schema({
@@ -184,10 +198,15 @@ const recipeSchema = new Schema({
     ...itemSchema.obj,
 
     ingredients: {
-        type: [String],
+        type: [subtaskSchema],
+        default: [],
     },
-    directions: {
-        type: [String],
+    instructions: {
+        type: [subtaskSchema],
+        default: [],
+    },
+    servings: {
+        type: Number,
     }
 });
 
@@ -196,3 +215,4 @@ export const Task = Item.discriminator<ITask>('Task', taskSchema);
 export const Event = Item.discriminator<IEvent>('Event', eventSchema);
 export const Page = Item.discriminator<IPage>('Page', pageSchema);
 export const Recipe = Item.discriminator<IRecipe>('Recipe', recipeSchema);
+export const Scheduled = Item.discriminator<IScheduled>('Scheduled', scheduledSchema);

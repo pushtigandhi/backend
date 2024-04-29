@@ -13,26 +13,37 @@ export default class ItemsController {
     private getValidFilter = (req: Request) => {
         const validFields = ["category", "section", "startlt", "startgt", "endlt", "endgt", "duration", "priority", "tags", "icon", "search"];
             
-            const filter = req.query as any;
+        const filter = req.query as any;
 
-            try {
-                if (!!filter.startlt) {
-                    filter.startlt = new Date(parseInt(filter.startlt));
-                }
-
-                if (!!filter.startgt) {
-                    filter.startgt = new Date(parseInt(filter.startgt));
-                }
-                if (!!filter.endlt) {
-                    filter.endlt = new Date(parseInt(filter.endlt));
-                }
-
-                if (!!filter.endgt) {
-                    filter.endgt = new Date(parseInt(filter.endgt));
-                }
-            } catch (e) {
-                return {error: "Invalid date format" } as IFilter;
+        try {
+            if (!!filter.startlt) {
+                filter.startlt = new Date(parseInt(filter.startlt));
             }
+
+            if (!!filter.startgt) {
+                filter.startgt = new Date(parseInt(filter.startgt));
+            }
+            if (!!filter.endlt) {
+                filter.endlt = new Date(parseInt(filter.endlt));
+            }
+
+            if (!!filter.endgt) {
+                filter.endgt = new Date(parseInt(filter.endgt));
+            }
+        } catch (e) {
+            return {error: "Invalid date format" } as IFilter;
+        }
+
+        try {
+            if (!!filter.sortBy) {
+                const validOrders = ["startDate", "-startDate", "endDate", "-endDate", "priority", "-priority", "createdDate", "-createdDate"];
+                if (!validOrders.includes(filter.sortBy as string)) {
+                    return {error: "Invalid order." } as IFilter;
+                }
+            }
+        } catch (e) {
+            return {error: "Invalid order." } as IFilter;
+        }
 
         const validFilter = _.pick(filter, validFields) as IFilter;
         return validFilter;
@@ -123,7 +134,7 @@ export default class ItemsController {
             return res.status(401).json({ error: 'Unauthorized' });
         }
         try {
-            newItem = _.pick(newItem, ["title", "description", "category", "section", "startDate", "endDate", "tags", "priority", "notes",
+            newItem = _.pick(newItem, ["title", "description", "category", "section", "startDate", "endDate", "tags", "priority", "notes", "scheduledItem",
                             "repeat", "icon", "subtasks", "contacts", "location", "address", "text", "ingredients", "directions"]);
 
             const missingFields = _.difference(["title"], Object.keys(newItem));
@@ -198,14 +209,15 @@ export default class ItemsController {
             const itemId_ = new Types.ObjectId(itemId);
 
             const validFields = ["title", "category","section","icon",
-            "favicon","tags","description","startDate",
-            "endDate","duration","repeat","priority","notes"]; //GET() default active properties
+            "favicon","tags","description", "duration", "notes"]; //GET() default active properties
 
             switch (itemType.toString().toUpperCase()) {
                 case ItemType.Task:
-                    let taskFields = ["subtasks"]; //GET() task active properties
+                    let taskFields = ["subtasks", "priority"]; //GET() task active properties
                     validFields.push(...taskFields);
                 case ItemType.Event:
+                    let scheduleField  = ["startDate", "endDate", "repeat", "priority"]; //GET() recipe active properties
+                    validFields.push(...scheduleField);
                     let eventFields = ["contacts", "address", "location", "subtasks"]; //GET() event active properties
                     validFields.push(...eventFields);
                 case ItemType.Page:
@@ -214,9 +226,14 @@ export default class ItemsController {
                 case ItemType.Recipe:
                     let recipeFields = ["ingredients", "directions"]; //GET() recipe active properties
                     validFields.push(...recipeFields);
+                case ItemType.Scheduled:
+                    let scheduleFields = ["startDate", "endDate", "repeat", "priority"]; //GET() recipe active properties
+                    validFields.push(...scheduleFields);
                 default:
                     break;
             }
+
+            console.log(validFields);
 
             let update = _.pick(req.body, validFields);
             

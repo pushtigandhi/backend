@@ -1,5 +1,5 @@
 import { Tag } from "../models/tag.model";
-import { Item, IItem, Task, ITask, Event, IEvent,
+import { Item, IItem, Task, ITask, Event, IEvent, Scheduled, IScheduled,
     Page, IPage,Recipe, IRecipe, ItemType } from "../models/item.model"
 import Profile, { IProfile } from "../models/profile.model";
 import { IUser } from "../models/users.model";
@@ -45,6 +45,7 @@ export default class ItemService {
     public page_model = Page;
     public recipe_model = Recipe;
     public profile_model = Profile;
+    public scheduled_model = Scheduled;
 
     private getModel(itemType: string): Promise<Model<IItem>> {
         let model;
@@ -60,6 +61,9 @@ export default class ItemService {
                 break;
             case ItemType.Recipe:
                 model = this.recipe_model;
+                break;
+            case ItemType.Scheduled:
+                model = this.scheduled_model;
                 break;
             default:
                 model = this.item_model;
@@ -135,11 +139,17 @@ export default class ItemService {
         let query;
         
         //if (!!myItems) {
-            query = (await myItems).filter(item => condition);
-            if(itemType !== "item")
-                items = query.filter(item => item.itemType === itemType);
-            else
-                items = query;
+        query = (await myItems).filter(item => condition);
+        if(itemType !== "item") {
+            items = query.filter(item => item.itemType === itemType);
+        }
+        else {
+            items = query;
+        }
+        // if(itemType !== "event") {
+        //     items = query.populate("contacts");
+        // }
+        
         // }
         // else { --- for publically shared items
         //     query = (await this.getModel(itemType)).find(condition);
